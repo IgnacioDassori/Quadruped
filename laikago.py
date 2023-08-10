@@ -7,10 +7,8 @@ from resources.ramp import Ramp
 
 client = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-plane = p.loadURDF("resources/base.urdf")
 
 ramp = Ramp(client=client)
-ramp.generate()
 #for _ in range(3):
 #	ramp.init_ramp()
 
@@ -131,7 +129,6 @@ while (1):
 	# camera view matrix
 	view_matrix = p.computeViewMatrix(rotated_point, rotated_view, rotated_up)
 	# camera projection matrix
-	projection_matrix = p.computeProjectionMatrixFOV(fov=60, aspect=1.0, nearVal=0.1, farVal=100.0)
+	projection_matrix = p.computeProjectionMatrixFOV(fov=90, aspect=1.0, nearVal=0.1, farVal=100.0)
 	# get camera image
 	imgs = p.getCameraImage(width=img_w, height=img_h, viewMatrix=view_matrix, projectionMatrix=projection_matrix)
-	
