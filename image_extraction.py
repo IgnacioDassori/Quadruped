@@ -1,8 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 import pybullet as pb
 import pybullet_data
 from resources.ramp import Ramp
+import datetime
+import torch
 
 def read_parameters(dbg_params):
     '''Reads values from debug parameters
@@ -90,11 +93,15 @@ def interactive_camera_placement(pos_scale=10.,
     camera_body = pb.createMultiBody(0, -1, camera_vis_id)
 
     # pyplot window to show feed
+    display_width = 320
+    display_height = 320
+    '''
     if show_plot:
         plt.figure()
         plt_im = plt.imshow(np.zeros((240,320,4)))
         plt.axis('off')
         plt.tight_layout(pad=0)
+    '''
 
     dbg['print'] =  pb.addUserDebugParameter('print params', 1, 0, 1)
     old_print_val = 1
@@ -128,12 +135,25 @@ def interactive_camera_placement(pos_scale=10.,
         pb.resetBasePositionAndOrientation(camera_body, cam_pos, cam_quat)
 
         view_mtx = view_mtx.reshape(-1, order='F')
-        img = pb.getCameraImage(width, height, view_mtx, proj_mtx)[2]
+        depth_img = (pb.getCameraImage(width, height, view_mtx, proj_mtx)[3]*255).astype(np.uint8)
+        img = cv2.resize(depth_img, (display_width, display_height))
+        colored = cv2.applyColorMap(img, cv2.COLORMAP_JET)
+        cv2.imshow('depth', colored)
+        key = cv2.waitKey(10) & 0xFF
+        if key == ord('q'):
+            break
+        elif key == ord('s'):
+            dt = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
+            tensor_depth = torch.from_numpy(depth_img)
+            torch.save(tensor_depth, f"images/images_npy/{dt}.pt")
+            cv2.imwrite(f"images/images_png/{dt}.png", colored)
+        '''
         if show_plot:
             plt_im.set_array(img)
             plt.gca().set_aspect(height/width)
             plt.draw()
             plt.pause(0.1)
+        '''
 
         if old_print_val != values['print']:
             old_print_val = values['print']
