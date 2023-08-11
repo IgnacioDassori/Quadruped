@@ -145,7 +145,7 @@ def interactive_camera_placement(pos_scale=10.,
         elif key == ord('s'):
             dt = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
             tensor_depth = torch.from_numpy(depth_img)
-            torch.save(tensor_depth, f"images/images_npy/{dt}.pt")
+            torch.save(tensor_depth, f"images/images_pt/{dt}.pt")
             cv2.imwrite(f"images/images_png/{dt}.png", colored)
         '''
         if show_plot:
