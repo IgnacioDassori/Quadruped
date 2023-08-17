@@ -64,7 +64,7 @@ def interactive_camera_placement(pos_scale=10.,
     dbg = dict()
     # for view matrix
     dbg['target_x'] = pb.addUserDebugParameter('target_x', -pos_scale, pos_scale, 0)
-    dbg['target_y'] = pb.addUserDebugParameter('target_y', -pos_scale, pos_scale, 0.25)
+    dbg['target_y'] = pb.addUserDebugParameter('target_y', -pos_scale, 20, 0.25)
     dbg['target_z'] = pb.addUserDebugParameter('target_z', -pos_scale, pos_scale, 0.5)
     dbg['distance'] = pb.addUserDebugParameter('distance', 0, max_dist, 0.2)
     dbg['yaw'] =  pb.addUserDebugParameter('yaw', -180, 180, 0)

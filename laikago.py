@@ -99,8 +99,8 @@ for j in range (p.getNumJoints(quadruped)):
                 index=index+1
 
 p.setRealTimeSimulation(1)
-img_w = 50
-img_h = 50
+img_w = 64
+img_h = 64
 
 while (1):
 	
