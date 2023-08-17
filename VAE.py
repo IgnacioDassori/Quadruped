@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from dataset import DepthDataset
+from torchvision import transforms
 import matplotlib.pyplot as plt
 import glob
 
@@ -19,17 +20,17 @@ class VAE(nn.Module):
             nn.Conv2d(64, 128, 4, 2, 1),
             nn.BatchNorm2d(128),
             nn.ReLU(True),
-            nn.Conv2d(128, 256, 4, 2, 1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(True),
+            #nn.Conv2d(128, 256, 4, 2, 1),
+            #nn.BatchNorm2d(256),
+            #nn.ReLU(True),
         )
-        self.fc_mu = nn.Linear(256 * 4 * 4, latent_dim)
-        self.fc_logvar = nn.Linear(256 * 4 * 4, latent_dim)
-        self.fc_decoder = nn.Linear(latent_dim, 256 * 4 * 4)
+        self.fc_mu = nn.Linear(128 * 8 * 8, latent_dim)
+        self.fc_logvar = nn.Linear(128 * 8 * 8, latent_dim)
+        self.fc_decoder = nn.Linear(latent_dim, 128 * 8 * 8)
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(256, 128, 4, 2, 1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(True),
+            #nn.ConvTranspose2d(256, 128, 4, 2, 1),
+            #nn.BatchNorm2d(128),
+            #nn.ReLU(True),
             nn.ConvTranspose2d(128, 64, 4, 2, 1),
             nn.BatchNorm2d(64),
             nn.ReLU(True),
@@ -51,7 +52,7 @@ class VAE(nn.Module):
     
     def decode(self, z):
         z = self.fc_decoder(z)
-        z = z.view(-1, 256, 4, 4)
+        z = z.view(-1, 128, 8, 8)
         return self.decoder(z)
     
     def reparameterize(self, mu, logvar):
@@ -78,19 +79,34 @@ if __name__ == "__main__":
 
     # load the dataset
     img_path = glob.glob("images/images_pt/*.pt")
-    dataset = DepthDataset(img_path)
-    train_set, val_set = torch.utils.data.random_split(dataset, [250, 28])
+    transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(30),
+        transforms.ToTensor()
+    ])
+    dataset = DepthDataset(img_path, transform)
+    train_set, val_set = torch.utils.data.random_split(dataset, [240, 32])
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=8, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_set, batch_size=8, shuffle=True)
 
+    '''
+    for batch_images in train_loader:
+        for n in range(len(batch_images)):
+            plt.imshow(batch_images[n].squeeze().numpy())
+            plt.show()
+    '''
+    
+
     # train the model
-    num_epochs = 100
+    num_epochs = 50
     for epoch in range(num_epochs):
         model.train()
         epoch_loss = 0
 
         for batch_images in train_loader:
-            batch_images = (batch_images.float()/255.0).unsqueeze(1).to(device)
+            batch_images = batch_images.float().to(device)
             recon_images, mu, logvar = model(batch_images)
             loss = model.loss_function(recon_images, batch_images, mu, logvar)
             epoch_loss += loss.item()
@@ -104,7 +120,7 @@ if __name__ == "__main__":
         eval_loss = 0
         with torch.no_grad():
             for batch_images in val_loader:
-                batch_images = (batch_images.float()/255.0).unsqueeze(1).to(device)
+                batch_images = batch_images.float().to(device)
                 recon_images, mu, logvar = model(batch_images)
                 loss = model.loss_function(recon_images, batch_images, mu, logvar)
                 eval_loss += loss.item()
@@ -114,11 +130,11 @@ if __name__ == "__main__":
 
     for batch_images in val_loader:
         test_img = batch_images[0]
-        input = (test_img.float()/255.0).unsqueeze(0).unsqueeze(0).to(device)
+        input = test_img.float().unsqueeze(0).to(device)
         recon_img, _, _ = model(input)
-        recon_img = recon_img.squeeze().cpu().detach().numpy()*255.0
+        recon_img = recon_img.squeeze().cpu().detach().numpy()
         # plot input and output
         fig, axes = plt.subplots(1, 2)
-        axes[0].imshow(test_img, cmap="gray")
-        axes[1].imshow(recon_img, cmap="gray")
+        axes[0].imshow(test_img.squeeze()*255.0, cmap="gray")
+        axes[1].imshow(recon_img*255.0, cmap="gray")
         plt.show()
