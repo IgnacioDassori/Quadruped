@@ -1,7 +1,5 @@
 import torch
-import glob
 from torch.utils.data import Dataset
-from torchvision import transforms
 
 class DepthDataset(Dataset):
     def __init__(self, image_path, transform=None):

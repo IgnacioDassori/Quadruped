@@ -24,7 +24,6 @@ quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
 quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,.5],quat, flags = urdfFlags,useFixedBase=False)
 
 #enable collision between lower legs
-
 for j in range (p.getNumJoints(quadruped)):
 		print(p.getJointInfo(quadruped,j))
 
@@ -62,6 +61,7 @@ for j in range (p.getNumJoints(quadruped)):
 		
 p.getCameraImage(480,320)
 '''
+#moving the robot according to data1.txt
 p.setRealTimeSimulation(0)
 
 joints=[]
@@ -86,6 +86,7 @@ with open(f"{pybullet_data.getDataPath()}/laikago/data1.txt","r") as filestream:
 		time.sleep(1./500.)
 
 '''
+#debug parameters for motor positions
 index = 0
 for j in range (p.getNumJoints(quadruped)):
         p.changeDynamics(quadruped,j,linearDamping=0, angularDamping=0)
