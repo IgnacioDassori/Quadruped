@@ -22,12 +22,12 @@ class Ramp:
 
     def generate(self):
         # load starting base
-        p.loadURDF("resources/base.urdf", [0, self.L/2-1, 0])
+        p.loadURDF(self._fname, [0, self.L/2-1, 0])
         # load ramps
         for _ in range(self.path_leght):
             self.init_ramp()
         # load ending base
-        p.loadURDF("resources/base.urdf", [0, self._ycord+self.L/2, self._height])
+        p.loadURDF(self._fname, [0, self._ycord+self.L/2, self._height])
 
     def init_ramp(self):
         self.random_pitch()

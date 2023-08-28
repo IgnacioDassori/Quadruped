@@ -24,8 +24,10 @@ quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
 quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,.5],quat, flags = urdfFlags,useFixedBase=False)
 
 #enable collision between lower legs
+'''
 for j in range (p.getNumJoints(quadruped)):
 		print(p.getJointInfo(quadruped,j))
+'''
 
 #2,5,8 and 11 are the lower legs
 lower_legs = [2,5,8,11]
@@ -33,7 +35,7 @@ for l0 in lower_legs:
 	for l1 in lower_legs:
 		if (l1>l0):
 			enableCollision = 1
-			print("collision for pair",l0,l1, p.getJointInfo(quadruped,l0)[12],p.getJointInfo(quadruped,l1)[12], "enabled=",enableCollision)
+			#print("collision for pair",l0,l1, p.getJointInfo(quadruped,l0)[12],p.getJointInfo(quadruped,l1)[12], "enabled=",enableCollision)
 			p.setCollisionFilterPair(quadruped, quadruped, 2,5,enableCollision)
 
 jointIds=[]
@@ -86,13 +88,15 @@ with open(f"{pybullet_data.getDataPath()}/laikago/data1.txt","r") as filestream:
 		time.sleep(1./500.)
 
 '''
+
+
+
 #debug parameters for motor positions
 index = 0
 for j in range (p.getNumJoints(quadruped)):
         p.changeDynamics(quadruped,j,linearDamping=0, angularDamping=0)
         info = p.getJointInfo(quadruped,j)
         js = p.getJointState(quadruped,j)
-        #print(info)
         jointName = info[1]
         jointType = info[2]
         if (jointType==p.JOINT_PRISMATIC or jointType==p.JOINT_REVOLUTE):
@@ -114,6 +118,7 @@ while (1):
 	# position and orientation of the agent
 	agent_pos, agent_orn = p.getBasePositionAndOrientation(quadruped)
 	euler = p.getEulerFromQuaternion(agent_orn)
+	print(euler)
 	roll, pitch, yaw = euler
 	# rotation matrices
 	roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))
@@ -133,3 +138,4 @@ while (1):
 	projection_matrix = p.computeProjectionMatrixFOV(fov=90, aspect=1.0, nearVal=0.1, farVal=100.0)
 	# get camera image
 	imgs = p.getCameraImage(width=img_w, height=img_h, viewMatrix=view_matrix, projectionMatrix=projection_matrix)
+	
