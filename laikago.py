@@ -24,10 +24,8 @@ quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
 quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,.5],quat, flags = urdfFlags,useFixedBase=False)
 
 #enable collision between lower legs
-'''
 for j in range (p.getNumJoints(quadruped)):
 		print(p.getJointInfo(quadruped,j))
-'''
 
 #2,5,8 and 11 are the lower legs
 lower_legs = [2,5,8,11]
@@ -118,7 +116,6 @@ while (1):
 	# position and orientation of the agent
 	agent_pos, agent_orn = p.getBasePositionAndOrientation(quadruped)
 	euler = p.getEulerFromQuaternion(agent_orn)
-	print(euler)
 	roll, pitch, yaw = euler
 	# rotation matrices
 	roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))

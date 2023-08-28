@@ -29,6 +29,7 @@ class Laikago:
         self.latent = None
         self.orientation = None
         self.image = None
+        self.motor_positions = None
         
     def apply_action(self, action):
         # actions are the motor positions
@@ -48,13 +49,13 @@ class Laikago:
             self.latent = self.get_latent_vector(encoder).squeeze(0)
             self.orientation = torch.tensor(p.getEulerFromQuaternion(p.getBasePositionAndOrientation(self.laikago)[1]))
         # get observation from low level every step (500Hz)
-        motor_positions = []
+        self.motor_positions = []
         for id in self.jointIds:
-            motor_positions.append(p.getJointState(self.laikago, id)[0])
+            self.motor_positions.append(p.getJointState(self.laikago, id)[0])
         l_velocity = list(p.getBaseVelocity(self.laikago)[0])
         a_velocity = list(p.getBaseVelocity(self.laikago)[1])
         # concatenate all observations
-        return torch.cat((self.latent, self.orientation, torch.tensor(motor_positions+l_velocity+a_velocity)))
+        return torch.cat((self.latent, self.orientation, torch.tensor(self.motor_positions+l_velocity+a_velocity)))
 
     def get_latent_vector(self, encoder):
         # get latent vector from VAE, return as numpy array
