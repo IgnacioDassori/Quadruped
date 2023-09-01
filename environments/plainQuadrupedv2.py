@@ -12,18 +12,18 @@ class plainEnv(gym.Env):
         super(plainEnv, self).__init__()
         # motor position (x8)
         self.action_space = gym.spaces.box.Box(
-            low=np.array([-0.5, -2.0, -0.5, -2.0, -0.5, -2.0, -0.5, -2.0]),
-            high=np.array([0.5, -0.6, 0.5, -0.6, 0.5, -0.6, 0.5, -0.6])
+            low=np.array([-0.5, -2.0, -0.5, -2.0]),
+            high=np.array([0.5, -0.6, 0.5, -0.6])
         )
-        # roll, pitch, motor positions (x8), motor velocities (x8), angular velocity
+        # pitch, motor positions (x8), velocity, angular velocity
         self.observation_space = gym.spaces.box.Box(
             low=np.array([-math.pi, -math.pi,
-                          -0.5, -2.0, -0.5, -2.0, -0.5, -2.0, -0.5, -2.0,
-                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          -0.5, -2.0, -0.5, -2.0,
+                          0.0, 0.0, 0.0, 0.0,
                           -10.0, -10.0]),
             high=np.array([math.pi, math.pi,
-                           0.5, -0.6, 0.5, -0.6, 0.5, -0.6, 0.5, -0.6,
-                           3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+                           0.5, -0.6, 0.5, -0.6,
+                           3.0, 3.0, 3.0, 3.0,
                            10.0, 10.0])
         )
         self.client = p.connect(p.GUI)
@@ -58,9 +58,7 @@ class plainEnv(gym.Env):
         # Set the initial motor positions
         for i, position in zip(self.quadruped.jointIds, initial_motor_positions):
             p.resetJointState(self.quadruped.laikago, jointIndex=i, targetValue=position)
-            ''' FOR TWO LEG VERSION (V2)
-            p.resetJointState(self.quadruped.laikago, jointIndex=i+4, targetValue=position) 
-            '''     
+            p.resetJointState(self.quadruped.laikago, jointIndex=i+4, targetValue=position)      
         self.timestep = 0
         return self.quadruped.get_observation()
 

@@ -117,6 +117,7 @@ while (1):
 	agent_pos, agent_orn = p.getBasePositionAndOrientation(quadruped)
 	euler = p.getEulerFromQuaternion(agent_orn)
 	roll, pitch, yaw = euler
+	print(agent_pos)
 	# rotation matrices
 	roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))
 	pitch_rot = np.array(([math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]))

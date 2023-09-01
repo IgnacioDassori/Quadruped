@@ -19,17 +19,17 @@ if __name__ == "__main__":
         env.envs[i] = Monitor(env.envs[i], log_dir)
 
     # create PPO model
-    model = PPO("MlpPolicy", env, verbose=1, device="cuda")
+    model = PPO("MlpPolicy", env, verbose=1, device="cuda", n_steps=4096, batch_size=512)
 
     # create callback
-    callback = SaveOnBestTrainingRewardCallback(check_freq=2048, log_dir=log_dir)
+    callback = SaveOnBestTrainingRewardCallback(check_freq=4096, log_dir=log_dir)
 
     # train model
-    model.learn(total_timesteps=10000, callback=callback)
+    model.learn(total_timesteps=1000000, callback=callback)
 
     # save model
     log_dir = "tmp/"
-    stats_path = os.path.join(log_dir, "vec_normalize_3.pkl")
-    model.save("models/ppo_plain_3")
+    stats_path = os.path.join(log_dir, "vec_normalize_plain.pkl")
+    model.save("models/plain")
     env.save(stats_path)
     env.close()

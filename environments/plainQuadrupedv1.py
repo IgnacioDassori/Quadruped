@@ -4,32 +4,29 @@ import time
 import math
 import pybullet as p
 import pybullet_data
-from resources.laikago_plain import Laikago
+from resources.laikago_tg import Laikago
 
 class plainEnv(gym.Env):
 
     def __init__(self):
         super(plainEnv, self).__init__()
-        # motor position (x8)
+        # TG parameters (ftg, atg, htg), motor position residual (x8)
         self.action_space = gym.spaces.box.Box(
-            low=np.array([-0.5, -2.0, -0.5, -2.0, -0.5, -2.0, -0.5, -2.0]),
-            high=np.array([0.5, -0.6, 0.5, -0.6, 0.5, -0.6, 0.5, -0.6])
+            low=np.array([0.2, 0.0, -1.8, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1]),
+            high=np.array([1.5, 1.5, -0.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
         )
-        # roll, pitch, motor positions (x8), motor velocities (x8), angular velocity
+        # motor positions, roll & pitch (and rate), phase of TG
         self.observation_space = gym.spaces.box.Box(
-            low=np.array([-math.pi, -math.pi,
-                          -0.5, -2.0, -0.5, -2.0, -0.5, -2.0, -0.5, -2.0,
-                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                          -10.0, -10.0]),
-            high=np.array([math.pi, math.pi,
-                           0.5, -0.6, 0.5, -0.6, 0.5, -0.6, 0.5, -0.6,
-                           3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
-                           10.0, 10.0])
+            low=np.array([-0.5, -2.0, -0.5, -2.0, -0.5, -2.0, -0.5, -2.0,
+                          -math.pi, -math.pi, -10.0, -10.0, 0.0]),
+            high=np.array([0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0,
+                           math.pi, math.pi, 10.0, 10.0, 2*math.pi])
         )
         self.client = p.connect(p.GUI)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         # Lenght of timestep
-        p.setTimeStep(1./500)
+        self._dt = 1./500
+        p.setTimeStep(self._dt)
         self.timestep = 0
         p.setRealTimeSimulation(0)
         # Quadruped
@@ -52,15 +49,12 @@ class plainEnv(gym.Env):
         p.resetSimulation(self.client)
         p.setGravity(0,0,-9.8)
         p.loadURDF("plane.urdf", basePosition=[0,0,0])
-        self.quadruped = Laikago(client=self.client)
+        self.quadruped = Laikago(client=self.client, dt=self._dt)
         # Define initial motor positions (radians)
-        initial_motor_positions = [0.0, -0.7, 0.0, -0.7, 0.0, -0.7, 0.0, -0.7]
+        initial_motor_positions = [0.0, -0.8, 0.0, -0.8, 0.0, -0.8, 0.0, -0.8]
         # Set the initial motor positions
         for i, position in zip(self.quadruped.jointIds, initial_motor_positions):
-            p.resetJointState(self.quadruped.laikago, jointIndex=i, targetValue=position)
-            ''' FOR TWO LEG VERSION (V2)
-            p.resetJointState(self.quadruped.laikago, jointIndex=i+4, targetValue=position) 
-            '''     
+            p.resetJointState(self.quadruped.laikago, jointIndex=i, targetValue=position)        
         self.timestep = 0
         return self.quadruped.get_observation()
 
