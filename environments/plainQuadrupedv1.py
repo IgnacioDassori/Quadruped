@@ -7,7 +7,9 @@ import pybullet_data
 from resources.laikago_tg import Laikago
 
 class plainEnv(gym.Env):
-
+    '''
+    TG VERSION ENVIRONMENT
+    '''
     def __init__(self):
         super(plainEnv, self).__init__()
         # TG parameters (ftg, atg, htg), motor position residual (x8)

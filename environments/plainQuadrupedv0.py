@@ -7,7 +7,9 @@ import pybullet_data
 from resources.laikago_plain import Laikago
 
 class plainEnv(gym.Env):
-
+    '''
+    PLAIN NAIVE VERSION ENVIRONMENT, 2 AND 4 LEGS
+    '''
     def __init__(self):
         super(plainEnv, self).__init__()
         # motor position (x8)
@@ -26,6 +28,23 @@ class plainEnv(gym.Env):
                            3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
                            10.0, 10.0])
         )
+        ''' FOR TWO LEG VERSION
+        self.action_space = gym.spaces.box.Box(
+            low=np.array([-0.5, -2.0, -0.5, -2.0]),
+            high=np.array([0.5, -0.6, 0.5, -0.6])
+        )
+        # pitch, motor positions (x8), velocity, angular velocity
+        self.observation_space = gym.spaces.box.Box(
+            low=np.array([-math.pi, -math.pi,
+                          -0.5, -2.0, -0.5, -2.0,
+                          0.0, 0.0, 0.0, 0.0,
+                          -10.0, -10.0]),
+            high=np.array([math.pi, math.pi,
+                           0.5, -0.6, 0.5, -0.6,
+                           3.0, 3.0, 3.0, 3.0,
+                           10.0, 10.0])
+        )        
+        '''
         self.client = p.connect(p.GUI)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         # Lenght of timestep
@@ -58,7 +77,7 @@ class plainEnv(gym.Env):
         # Set the initial motor positions
         for i, position in zip(self.quadruped.jointIds, initial_motor_positions):
             p.resetJointState(self.quadruped.laikago, jointIndex=i, targetValue=position)
-            ''' FOR TWO LEG VERSION (V2)
+            ''' FOR TWO LEG VERSION
             p.resetJointState(self.quadruped.laikago, jointIndex=i+4, targetValue=position) 
             '''     
         self.timestep = 0

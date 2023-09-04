@@ -2,16 +2,24 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import pybullet as p
+
 
 # GLOBAL PARAMETERS
-w = 2.5
-d = 0.7
-off_h = -math.pi/2
-off_k = 120*math.pi/180
+f = 1.0
+d = 0.5
+off_h = 0
+off_k = 0.8
 
 # HIP JOINT
 timesteps = 1000
-Phi = np.linspace(0, 10*math.pi, timesteps)
+end_time = 1
+t = np.linspace(0, end_time, timesteps)
+Phi = np.array([(2*math.pi*f*i*t[1])%(2*math.pi) for i in range(timesteps)])
+
+plt.plot(t, Phi)
+plt.show()
+
 Ah = 0.6
 phi_h = []
 for phi in Phi:
@@ -22,7 +30,7 @@ for phi in Phi:
         phi_h.append((phi + 2*math.pi*(1-2*d))/(2*(1-d)))
 hip_commands = []
 for phi in phi_h:
-    hip_commands.append(Ah*math.cos(phi)+off_h)
+    hip_commands.append((Ah*math.cos(phi)+off_h)*(-1))
 
 # KNEE JOINT
 phi_k = phi_h # can add offset later
@@ -46,7 +54,8 @@ for phi in phi_k:
     gamma.append(max(g,0))
 knee_commands = []
 for i in range(len(gamma)):
-    knee_commands.append(ak[i]*gamma[i]+off_k)
+    knee_commands.append((ak[i]*gamma[i]+off_k)*(-1))
+
 
 
 fig, axes = plt.subplots(2, 1)
@@ -86,5 +95,5 @@ def update(frame):
     return line,line2
 
 # Create the animation
-ani = FuncAnimation(fig, update, frames=timesteps, blit=True, interval=50)
+ani = FuncAnimation(fig, update, frames=timesteps, blit=True, interval=2)
 plt.show()

@@ -9,20 +9,19 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
-        self.save_path = os.path.join(log_dir, "best_model_TG")
+        self.save_path = os.path.join(log_dir, "best_model")
         self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
-        if self.save_path is not None:
-            os.makedirs(self.save_path, exist_ok=True)
+        pass
 
     def _on_step(self) -> bool:
         if self.n_calls % self.check_freq == 0:
             # Retrieve training reward
             x, y = ts2xy(load_results(self.log_dir), 'timesteps')
             if len(x) > 0:
-                # Mean training reward over the last 100 episodes
-                mean_reward = np.mean(y[-100:])
+                # Mean training reward over the last 10 episodes
+                mean_reward = np.mean(y[-10:])
                 if self.verbose > 0:
                     print("Num timesteps: {}".format(self.num_timesteps))
                     print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(self.best_mean_reward, mean_reward))

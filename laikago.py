@@ -23,6 +23,12 @@ urdfFlags = p.URDF_USE_SELF_COLLISION
 quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
 quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,.5],quat, flags = urdfFlags,useFixedBase=False)
 
+jointIds=[1, 2, 5, 6, 9, 10, 13, 14]
+initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]
+
+for i, position in zip(jointIds, initial_motor_positions):
+	p.resetJointState(quadruped, jointIndex=i, targetValue=position)
+
 #enable collision between lower legs
 for j in range (p.getNumJoints(quadruped)):
 		print(p.getJointInfo(quadruped,j))
@@ -117,7 +123,8 @@ while (1):
 	agent_pos, agent_orn = p.getBasePositionAndOrientation(quadruped)
 	euler = p.getEulerFromQuaternion(agent_orn)
 	roll, pitch, yaw = euler
-	print(agent_pos)
+	vel = p.getBaseVelocity(quadruped)
+	print(vel[1])
 	# rotation matrices
 	roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))
 	pitch_rot = np.array(([math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]))
