@@ -1,6 +1,11 @@
 from gym.envs.registration import register
 
 register(
+    id='slopeQuadruped-v1',
+    entry_point='environments.SlopeQuadrupedv1:SlopeQuadrupedEnv'
+)
+
+register(
     id='plainQuadruped-v0',
     entry_point='environments.plainQuadrupedv0:plainEnv'
 )

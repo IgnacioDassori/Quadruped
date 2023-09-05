@@ -13,12 +13,12 @@ class SlopeQuadrupedEnv(gym.Env):
 
     def __init__(self):
         super(SlopeQuadrupedEnv, self).__init__()
-        # motor velocity (x8)
+        # motor positions (x8)
         self.action_space = gym.spaces.box.Box(
             low=np.array([-0.5, -2.0, -0.5, -2.0, -0.5, -2.0, -0.5, -2.0]),
             high=np.array([0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0])
         )
-        # latent vector (x8), pitch, motor positions (x12), velocity, angular velocity
+        # latent vector (x8), pitch, motor positions (x8), velocity, angular velocity
         self.observation_space = gym.spaces.box.Box(
             low=np.array([-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
                           -math.pi, -math.pi, -math.pi,
@@ -29,7 +29,7 @@ class SlopeQuadrupedEnv(gym.Env):
                            0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0,
                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
         )
-        self.client = p.connect(p.GUI)
+        self.client = p.connect(p.DIRECT)
         # Lenght of timestep
         p.setTimeStep(1./500)
         self.timestep = 0
@@ -54,7 +54,7 @@ class SlopeQuadrupedEnv(gym.Env):
         # get HL observation every 50 steps (10Hz)
         obs = self.quadruped.get_observation(self.timestep, self.encoder)
         done = self.quadruped.is_done(self.timestep)
-        rew = self.quadruped.calculate_reward(done, self.timestep)
+        rew = self.quadruped.calculate_reward(done, timestep=self.timestep)
         info = {}
         self.timestep += 1
         return obs, rew, done, info

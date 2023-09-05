@@ -17,9 +17,9 @@ if __name__ == "__main__":
     img_path = glob.glob("images/images_pt/*.pt")
     transform = transforms.Compose([
         transforms.ToPILImage(),
-        #transforms.RandomVerticalFlip(),
-        #transforms.RandomHorizontalFlip(),
-        #transforms.RandomRotation(30),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(30),
         transforms.ToTensor()
     ])
     dataset = DepthDataset(img_path, transform)
@@ -27,6 +27,7 @@ if __name__ == "__main__":
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=16, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_set, batch_size=1, shuffle=True)
 
+    '''
     # load the model
     model.load_state_dict(torch.load("models/model.pt"))
     for batch_images in val_loader:
@@ -40,7 +41,7 @@ if __name__ == "__main__":
         axes[0].imshow(test_img.squeeze(), cmap="gray")
         axes[1].imshow(recon_img, cmap="gray")
         plt.show()
-
+    '''
 
     '''
     for batch_images in train_loader:
@@ -48,9 +49,10 @@ if __name__ == "__main__":
             plt.imshow(batch_images[n].squeeze().numpy())
             plt.show()
     '''
-'''
+
     # train the model
     num_epochs = 300
+    loss_list = []
     for epoch in range(num_epochs):
         model.train()
         epoch_loss = 0
@@ -65,10 +67,17 @@ if __name__ == "__main__":
             loss.backward()
             model.optimizer.step()
         epoch_loss /= len(train_loader)
+        loss_list.append(epoch_loss)
 
         print(f"Epoch {epoch+1} train loss: {epoch_loss:.4f}")
 
+    # plot the loss
+    plt.plot(loss_list)
+    plt.title("Loss por época de entrenamiento")
+    plt.xlabel("Época")
+    plt.ylabel("Loss")
+    plt.show()
     # save the model
     torch.save(model.state_dict(), "models/model.pt")
-'''
+
 

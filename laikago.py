@@ -7,8 +7,8 @@ from resources.ramp import Ramp
 
 client = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-
-ramp = Ramp(client=client)
+p.loadURDF("plane.urdf")
+#ramp = Ramp(client=client)
 #for _ in range(3):
 #	ramp.init_ramp()
 

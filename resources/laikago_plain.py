@@ -19,16 +19,18 @@ class Laikago:
         # lower leg joints: 2, 6, 10, 14
         self.jointIds=[]
         i=0
+        '''
         for _ in range(4):
             self.jointIds.append(i+1)
             self.jointIds.append(i+2)
             i+=4
-        ''' FOR TWO LEG VERSION (V2)
+        '''
+        ''' FOR TWO LEG VERSION (V2)'''
         for _ in range(2):
             self.jointIds.append(i+1)
             self.jointIds.append(i+2)
             i+=8
-        '''
+        
         self.orientation = None
         self.current_pos = p.getBasePositionAndOrientation(self.laikago)[0][1]
         
@@ -43,7 +45,7 @@ class Laikago:
                 force=20, 
                 maxVelocity=3,
             )
-        ''' FOR TWO LEG VERSION (V2)
+            ''' FOR TWO LEG VERSION (V2) '''
             p.setJointMotorControl2(
                 self.laikago,
                 motor_id+4,
@@ -52,7 +54,7 @@ class Laikago:
                 force=20, 
                 maxVelocity=3,
             )
-            '''
+            
 
     def get_observation(self):
         # get observation
@@ -78,7 +80,7 @@ class Laikago:
         # reward forward movement, penalize angular velocity
         _, a_vel = p.getBaseVelocity(self.laikago)
         if done:
-            return -100 + g_progress*10 + timestep/5 - abs(a_vel[0])**2
+            return -100 + g_progress*10 + timestep/50 - abs(a_vel[0])**2
         self.current_pos = pos[1]
         not_falling = (abs(a_vel[0])<2.0)
         if self.current_pos>milestone[0]:

@@ -46,8 +46,8 @@ class Laikago:
         # get observation from high level every 50 steps (10Hz)
         if timestep % 50 == 0:
             # high level observation includes latent vector and orientation
-            self.latent = self.get_latent_vector(encoder).squeeze(0)
-            self.orientation = torch.tensor(p.getEulerFromQuaternion(p.getBasePositionAndOrientation(self.laikago)[1]))
+            self.latent = self.get_latent_vector(encoder).squeeze(0).detach()
+            self.orientation = p.getEulerFromQuaternion(p.getBasePositionAndOrientation(self.laikago)[1])
         # get observation from low level every step (500Hz)
         self.motor_positions = []
         for id in self.jointIds:
@@ -55,7 +55,7 @@ class Laikago:
         l_velocity = list(p.getBaseVelocity(self.laikago)[0])
         a_velocity = list(p.getBaseVelocity(self.laikago)[1])
         # concatenate all observations
-        return torch.cat((self.latent, self.orientation, torch.tensor(self.motor_positions+l_velocity+a_velocity)))
+        return np.concatenate((self.latent, self.orientation, self.motor_positions+l_velocity+a_velocity))
 
     def get_latent_vector(self, encoder):
         # get latent vector from VAE, return as numpy array
@@ -95,9 +95,9 @@ class Laikago:
     def calculate_reward(self, done, timestep):
         # decrease penalty based on episode length
         if done:
-            return -100
+            return -100 + timestep/50
         vel = p.getBaseVelocity(self.laikago)[0]
-        return vel[1]*timestep
+        return vel[1]
     
     def is_done(self, timestep):
         # robot falls

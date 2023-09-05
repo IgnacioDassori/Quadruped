@@ -5,6 +5,9 @@ import math
 from resources.cpg import CPG
 
 class LaikagoCPG:
+    '''
+    VERSION WITH BAD REWARD, INSTANT FALL
+    '''
     def __init__(self, client, dt=1./500):
         self.client = client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -97,8 +100,8 @@ class LaikagoCPG:
         # robot falls
         if abs(self.ori[1]) > 0.5:
             return True
-        #if self.pos[2] < 0.3 or self.pos[1]<-0.2:
-        #    return True
+        if self.pos[2] < 0.3 or self.pos[1]<-0.2:
+            return True
         # robot reaches goal
         if self.pos[1]>3.0:
             return True

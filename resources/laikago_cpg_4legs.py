@@ -5,6 +5,9 @@ import math
 from resources.cpg import CPG
 
 class LaikagoCPG:
+    '''
+    FINAL VERSION WITH GOOD REWARD
+    '''
     def __init__(self, client, dt=1./500):
         self.client = client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())

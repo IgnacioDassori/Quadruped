@@ -8,7 +8,7 @@ from resources.laikago_cpg_4legs import LaikagoCPG as Laikago
 
 class plainCPGEnv(gym.Env):
     '''
-    CPG 4 LEGS ENVIRONMENT
+    CPG 4 LEGS ENVIRONMENT. FINAL VERSION
     '''
     def __init__(self):
         super(plainCPGEnv, self).__init__()

@@ -6,19 +6,16 @@ import pybullet as p
 
 
 # GLOBAL PARAMETERS
-f = 1.0
-d = 0.5
+f = 5.0
+d = 0.75
 off_h = 0
 off_k = 0.8
 
 # HIP JOINT
-timesteps = 1000
+timesteps = 5000
 end_time = 1
 t = np.linspace(0, end_time, timesteps)
 Phi = np.array([(2*math.pi*f*i*t[1])%(2*math.pi) for i in range(timesteps)])
-
-plt.plot(t, Phi)
-plt.show()
 
 Ah = 0.6
 phi_h = []
@@ -56,11 +53,17 @@ knee_commands = []
 for i in range(len(gamma)):
     knee_commands.append((ak[i]*gamma[i]+off_k)*(-1))
 
-
-
 fig, axes = plt.subplots(2, 1)
-axes[0].plot(Phi, hip_commands)
-axes[1].plot(Phi, knee_commands)
+axes[0].plot(t, hip_commands)
+axes[0].set_title("Hip Commands")
+axes[0].xlim = (0, end_time)
+axes[0].set_xlabel("Time (s)")
+axes[0].set_ylabel("Angle (rad)")
+axes[1].plot(t, knee_commands)
+axes[1].set_title("Knee Commands")
+axes[1].xlim = (0, end_time)
+axes[1].set_xlabel("Time (s)")
+axes[1].set_ylabel("Angle (rad)")
 plt.show()
 
 
