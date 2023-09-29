@@ -7,10 +7,10 @@ from resources.ramp import Ramp
 
 client = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-p.loadURDF("plane.urdf")
-#ramp = Ramp(client=client)
-#for _ in range(3):
-#	ramp.init_ramp()
+#plane = p.loadURDF("plane.urdf")
+ramp = Ramp(client=client)
+for _ in range(3):
+	ramp.init_ramp()
 
 #rampPitch = 15 #In degrees
 #rampOrientation = p.getQuaternionFromEuler([15*math.pi/180, 0, 0])
@@ -31,7 +31,8 @@ for i, position in zip(jointIds, initial_motor_positions):
 
 #enable collision between lower legs
 for j in range (p.getNumJoints(quadruped)):
-		print(p.getJointInfo(quadruped,j))
+	pass
+		#print(p.getJointInfo(quadruped,j))
 
 #2,5,8 and 11 are the lower legs
 lower_legs = [2,5,8,11]
@@ -40,7 +41,7 @@ for l0 in lower_legs:
 		if (l1>l0):
 			enableCollision = 1
 			#print("collision for pair",l0,l1, p.getJointInfo(quadruped,l0)[12],p.getJointInfo(quadruped,l1)[12], "enabled=",enableCollision)
-			p.setCollisionFilterPair(quadruped, quadruped, 2,5,enableCollision)
+			#p.setCollisionFilterPair(quadruped, quadruped, 2,5,enableCollision)
 
 jointIds=[]
 paramIds=[]
@@ -124,7 +125,7 @@ while (1):
 	euler = p.getEulerFromQuaternion(agent_orn)
 	roll, pitch, yaw = euler
 	vel = p.getBaseVelocity(quadruped)
-	print(vel[1])
+	print(euler)
 	# rotation matrices
 	roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))
 	pitch_rot = np.array(([math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]))

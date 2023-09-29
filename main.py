@@ -2,13 +2,18 @@ from stable_baselines3 import PPO
 import gym
 import numpy as np
 import pandas as pd
+import time
+import json
 import matplotlib.pyplot as plt
 from environments.plainCPG import plainCPGEnv
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "plainCPG2"
+    version = "tensor_test"
+    # load config from json
+    with open(f"tmp/{version}/config.json") as f:
+        config = json.load(f)
 
     # plot the results
     df = pd.read_csv(f"tmp/{version}/monitor.csv", skiprows=1)
@@ -26,8 +31,8 @@ if __name__ == "__main__":
     plt.show()
 
     # load trained vector environment
-    gym_env = 'plainCPGEnv-v0'
-    vec_env = DummyVecEnv([lambda: gym.make(gym_env)])
+    gym_env = config['env']
+    vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'])])
     vec_env = VecNormalize.load(f"tmp/{version}/vec_normalize.pkl", vec_env)
     vec_env.training = False
     vec_env.norm_reward = False
@@ -37,7 +42,16 @@ if __name__ == "__main__":
 
     # evaluate model
     obs = vec_env.reset()
+    cpg_params = []
     for i in range(10000):
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
+        cpg = vec_env.envs[0].quadruped.CPG
+        cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d])
+        if dones:
+            break
+        
+    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd'])
+    plt.legend()
+    plt.show()
         

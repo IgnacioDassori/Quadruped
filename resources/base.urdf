@@ -9,16 +9,24 @@
     <link name="base_link">
         <visual> 
             <geometry> 
-                <box size="2 4 0.01"/>
+                <box size="2 2 0.01"/>
                 <origin rpy="0 0 0" xyz="-1 -1 -0.005"/>
             </geometry>
             <material name="red"/>
         </visual>
         <collision> 
              <geometry> 
-                <box size="2 4 0.01"/>
+                <box size="2 2 0.01"/>
                 <origin rpy="0 0 0" xyz="-1 -1 -0.005"/>
             </geometry>
+            <surface>
+                <friction>
+                <ode>
+                    <mu>1.0</mu>
+                    <mu2>1.0</mu2>
+                </ode>
+                </friction>
+            </surface> 
         </collision> 
         <inertial> 
             <mass value="0"/>

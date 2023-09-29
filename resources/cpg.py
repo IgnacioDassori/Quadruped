@@ -2,10 +2,10 @@ import numpy as np
 import math
 
 class CPG:
-    def __init__(self, dt):
+    def __init__(self, dt, gamma=5.0):
         # cpg static parameters
         self._dt = dt
-        self._gamma = 10.0
+        self._gamma = gamma
         # cpg adaptive parameters
         self._phases = np.array([0, math.pi, math.pi/2, 3*math.pi/2])
         self._f = 5.0
@@ -21,7 +21,6 @@ class CPG:
     def update(self, updates):
         self._phases = (self._phases + 2*math.pi*self._f*self._dt) % (2*math.pi)
         # change parameters gradualy
-        
         self._f += (updates[0]-self._f)*self._gamma*self._dt 
         self._Ah += (updates[1]-self._Ah)*self._gamma*self._dt
         self._Ak_st += (updates[2]-self._Ak_st)*self._gamma*self._dt
@@ -62,8 +61,8 @@ class CPG:
             if theta < 0.5:
                 g = -16*(theta**3) + 12*(theta**2)
             else:
-                g = 12*(theta-0.5)**3 - 12*(theta-0.5)**2 + 1
+                g = 16*(theta-0.5)**3 - 12*(theta-0.5)**2 + 1
             # knee angle
-            knee_angle = Ak*max(g,0) + self._k_offset
+            knee_angle = Ak*g + self._k_offset
             motor_angles.append(knee_angle)
         return np.array(motor_angles)*(-1)

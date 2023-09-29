@@ -22,5 +22,12 @@ register(
 
 register(
     id='plainCPGEnv-v0',
-    entry_point='environments.plainCPG:plainCPGEnv'
+    entry_point='environments.plainCPG:plainCPGEnv',
+    kwargs={'mode': 0, 'freq_range': [3.0, 8.0], 'gamma': 5.0}
+)
+
+register(
+    id='slopeCPGEnv-v0',
+    entry_point='environments.slopeCPG:slopeCPGEnv',
+    kwargs={'start': 0.0}
 )

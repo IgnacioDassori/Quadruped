@@ -1,6 +1,0 @@
-This version uses CPG for all 4 legs
-
-training params:
-
-- n_steps=4096, batch_size=512
-- reward mean = 10 episodes

@@ -8,12 +8,12 @@ class LaikagoCPG:
     '''
     FINAL VERSION WITH GOOD REWARD
     '''
-    def __init__(self, client, dt=1./500):
+    def __init__(self, client, start= 0.0, dt=1./500, gamma=5.0):
         self.client = client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
         self.laikago = p.loadURDF("laikago/laikago_toes.urdf",
-                                  [0,0,.44],
+                                  [0,start,.44],
                                   quat, 
                                   flags = p.URDF_USE_SELF_COLLISION,
                                   useFixedBase=False,
@@ -26,13 +26,15 @@ class LaikagoCPG:
             self.jointIds.append(i+1)
             self.jointIds.append(i+2)
             i+=4
-        self.CPG = CPG(dt)
+        self.CPG = CPG(dt, gamma)
         self.pos = None
         self.ori = None
         self.vel = None
-        self.last_pos = 0.052
+        self.start = start
+        self.last_pos = start
         self.milestones = [i for i in range(1, 11)]
         self.max_episode_length = 5000
+        self.goal = 5.0
 
     def apply_action(self, action):
         # update CPG parameters
@@ -83,12 +85,11 @@ class LaikagoCPG:
         l_vel = self.vel[0]
         
         # if early termination (proportional to how early it was)
-        goal = 5.0
         if done:
-            if current_pos > goal:
+            if current_pos > self.goal:
                 return 0
             else: 
-                return -1000 + timestep/5
+                return -1000 + timestep/(self.max_episode_length/1000)
         
         falling = (abs(a_vel[0])>2.0)
         '''
@@ -97,16 +98,16 @@ class LaikagoCPG:
                 milestone_reward = self.milestones.pop(0)
         return 10*(l_vel[1]+milestone_reward)*(1-falling) - (abs(a_vel[1])+abs(a_vel[0]))
         '''
-        return 10*(l_vel[1])*(1-falling) - (abs(a_vel[1])+abs(a_vel[0]))
+        return 10*(l_vel[1])*(1-falling) - (abs(a_vel[1])+abs(a_vel[2]))
     
     def is_done(self, timestep):
         # robot falls
-        if abs(self.ori[1]) > 0.5:
+        if abs(self.ori[1]) > 0.5 or abs(self.ori[0]-math.pi/2) > 0.5:
             return True
-        if self.pos[2] < 0.2 or self.pos[1]<-0.2:
+        if (self.pos[1]-self.start)<-0.2:
             return True
         # robot reaches goal
-        if self.pos[1]>5.0:
+        if self.pos[1]>self.goal:
             return True
         # maximum episode length
         if timestep >= self.max_episode_length:
