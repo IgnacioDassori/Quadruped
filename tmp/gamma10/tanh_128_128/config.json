@@ -1,0 +1,23 @@
+{
+    "env": "plainCPGEnv-v0",
+    "lr": 0.0003,
+    "n_steps": 16384,
+    "batch_size": 1024,
+    "net_arch": {
+        "pi": [
+            128,
+            128
+        ],
+        "vf": [
+            128,
+            128
+        ]
+    },
+    "activation_fn": "<class 'torch.nn.modules.activation.Tanh'>",
+    "total_timesteps": 1000000,
+    "freq_range": [
+        1.5,
+        5
+    ],
+    "gamma": 10.0
+}

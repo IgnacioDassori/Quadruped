@@ -11,13 +11,7 @@ class LaikagoCPG:
     def __init__(self, client, start= 0.0, dt=1./500, gamma=5.0):
         self.client = client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
-        self.laikago = p.loadURDF("laikago/laikago_toes.urdf",
-                                  [0,start,.44],
-                                  quat, 
-                                  flags = p.URDF_USE_SELF_COLLISION,
-                                  useFixedBase=False,
-                                  physicsClientId=self.client)
+        self.laikago = None
         # upper leg joints: 1, 5, 9, 13
         # lower leg joints: 2, 6, 10, 14
         self.jointIds=[]
@@ -35,6 +29,15 @@ class LaikagoCPG:
         self.milestones = [i for i in range(1, 11)]
         self.max_episode_length = 5000
         self.goal = 5.0
+
+    def spawn(self, pitch=0, z=0.44):
+        quat = p.getQuaternionFromEuler([math.pi/2-pitch,0,math.pi])
+        self.laikago = p.loadURDF("laikago/laikago_toes.urdf",
+                                  [0,0,z],
+                                  quat, 
+                                  flags = p.URDF_USE_SELF_COLLISION,
+                                  useFixedBase=False,
+                                  physicsClientId=self.client)   
 
     def apply_action(self, action):
         # update CPG parameters
@@ -92,13 +95,12 @@ class LaikagoCPG:
                 return -1000 + timestep/(self.max_episode_length/1000)
         
         falling = (abs(a_vel[0])>2.0)
-        '''
-        if len(self.milestones)>0:
-            if current_pos>self.milestones[0]:
-                milestone_reward = self.milestones.pop(0)
-        return 10*(l_vel[1]+milestone_reward)*(1-falling) - (abs(a_vel[1])+abs(a_vel[0]))
-        '''
+
         return 10*(l_vel[1])*(1-falling) - (abs(a_vel[1])+abs(a_vel[2]))
+    
+    def calculate_reward_2(self):
+
+        pass
     
     def is_done(self, timestep):
         # robot falls

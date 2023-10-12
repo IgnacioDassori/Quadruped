@@ -37,20 +37,22 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         return True
     
 class SaveBestModelCallback(CheckpointCallback):
-    def __init__(self, save_path, name_prefix, verbose=1):
-        super().__init__(save_freq=4096, save_path=save_path, name_prefix=name_prefix, verbose=verbose)
+    def __init__(self, check_freq, save_path, name_prefix, verbose=1):
+        super().__init__(save_freq=check_freq, save_path=save_path, name_prefix=name_prefix, verbose=verbose)
         self.best_mean_reward = -np.inf  # Initialize with negative infinity
-        self.save_path = os.path.join(save_path, "best_model")
+        self.save_path = save_path
+        self.check_freq = check_freq
 
     def _on_step(self) -> bool:
-        if self.num_timesteps > 0 and self.num_timesteps % self.save_freq == 0:
+        if self.num_timesteps > 0 and self.num_timesteps % self.check_freq == 0:
             rewards = [episode['r'] for episode in self.model.ep_info_buffer]
             mean_reward = np.mean(rewards)
             print("Num timesteps: {}".format(self.num_timesteps))
             print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(self.best_mean_reward, mean_reward))
             if mean_reward > self.best_mean_reward:
                 self.best_mean_reward = mean_reward
-                print("Saving new best model to {}".format(self.save_path))
-                self.model.save(self.save_path)
+                file_path = os.path.join(self.save_path, f"{self.name_prefix}.zip")
+                print("Saving new best model to {}".format(file_path))
+                self.model.save(file_path)
         return True
 

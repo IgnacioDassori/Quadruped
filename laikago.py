@@ -3,14 +3,19 @@ import time
 import pybullet_data
 import math
 import numpy as np
-from resources.ramp import Ramp
+from resources.ramp import Ramp, Bridge
 
 client = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-#plane = p.loadURDF("plane.urdf")
-ramp = Ramp(client=client)
-for _ in range(3):
-	ramp.init_ramp()
+plane = p.loadURDF("plane.urdf")
+#ramp = Ramp(client=client)
+#for _ in range(3):
+#	ramp.init_ramp()
+'''
+bridge = Bridge(client=client)
+pitch, x_start = bridge.get_status()
+laikago_z = (0-x_start)*math.tan(pitch) + 0.5/math.cos(pitch)
+'''
 
 #rampPitch = 15 #In degrees
 #rampOrientation = p.getQuaternionFromEuler([15*math.pi/180, 0, 0])
@@ -21,10 +26,10 @@ p.setTimeStep(1./500)
 #urdfFlags = p.URDF_USE_SELF_COLLISION+p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS 
 urdfFlags = p.URDF_USE_SELF_COLLISION
 quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
-quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,.5],quat, flags = urdfFlags,useFixedBase=False)
+quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,0.44],quat, flags = urdfFlags,useFixedBase=False)
 
 jointIds=[1, 2, 5, 6, 9, 10, 13, 14]
-initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]
+initial_motor_positions = [0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0]
 
 for i, position in zip(jointIds, initial_motor_positions):
 	p.resetJointState(quadruped, jointIndex=i, targetValue=position)
@@ -109,8 +114,8 @@ for j in range (p.getNumJoints(quadruped)):
                 index=index+1
 
 p.setRealTimeSimulation(1)
-img_w = 64
-img_h = 64
+img_w = 128
+img_h = 128
 
 while (1):
 	
@@ -119,13 +124,12 @@ while (1):
 		targetPos = p.readUserDebugParameter(c)
 		maxForce = p.readUserDebugParameter(maxForceId)
 		p.setJointMotorControl2(quadruped,jointIds[i],p.POSITION_CONTROL,jointDirections[i]*targetPos+jointOffsets[i], force=maxForce)
-	
+
 	# position and orientation of the agent
 	agent_pos, agent_orn = p.getBasePositionAndOrientation(quadruped)
 	euler = p.getEulerFromQuaternion(agent_orn)
 	roll, pitch, yaw = euler
 	vel = p.getBaseVelocity(quadruped)
-	print(euler)
 	# rotation matrices
 	roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))
 	pitch_rot = np.array(([math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]))

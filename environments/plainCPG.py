@@ -14,18 +14,18 @@ class plainCPGEnv(gym.Env):
         super(plainCPGEnv, self).__init__()
         # CPG parameters (f, Ah, Ak_st, Ak_sw, d)
         self.action_space = gym.spaces.box.Box(
-            low=np.array([freq_range[0], 0.0, 0.0, 0.0, 0.05]),
-            high=np.array([freq_range[1], 1.0, 0.8, 1.0, 0.95])
+            low=np.array([0, 0.0, 0.0, 0.0, 0.05]),
+            high=np.array([1.0, 1.0, 0.8, 1.0, 0.95])
         )
         # roll, pitch, angular velocity (x2), motor positions (x8), CPG parameters & phase
         self.observation_space = gym.spaces.box.Box(
             low=np.array([-math.pi, -math.pi, -10.0, -10.0,
                           -1.0, -1.7, -1.0, -1.7, -1.0, -1.7, -1.0, -1.7,
-                          0.0, freq_range[0], 0.0, 0.0, 0.0, 0.05
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0
                           ]),
             high=np.array([math.pi, math.pi, 10.0, 10.0,
                            1.0, 0.3, 1.0, 0.3, 1.0, 0.3, 1.0, 0.3,
-                           2*math.pi, freq_range[1], 1.0, 0.8, 1.0, 0.95
+                           2*math.pi, 10.0, 1.0, 0.8, 1.0, 1.0
                            ])
         )
         # start in GUI or DIRECT mode
@@ -41,16 +41,9 @@ class plainCPGEnv(gym.Env):
         self.quadruped = None
         # CPG proportional controler gain
         self.gamma = gamma
+        self.freq_range = freq_range
 
     def step(self, action):
-        '''
-        if self.timestep == 0:
-            self.quadruped.CPG._f = action[0]
-            self.quadruped.CPG._Ah = action[1]
-            self.quadruped.CPG._Ak_st = action[2]
-            self.quadruped.CPG._Ak_sw = action[3]
-            self.quadruped.CPG._d = action[4]
-        '''
         # give action to agent
         self.quadruped.apply_action(action)
         p.stepSimulation()
@@ -66,6 +59,8 @@ class plainCPGEnv(gym.Env):
         p.setGravity(0,0,-9.8)
         p.loadURDF("plane.urdf", basePosition=[0,0,0])
         self.quadruped = Laikago(client=self.client, gamma=self.gamma)
+        self.quadruped.spawn()
+        self.quadruped.CPG.freq_range = self.freq_range
         # Define initial motor positions (radians)
         initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]
         # Set the initial motor positions

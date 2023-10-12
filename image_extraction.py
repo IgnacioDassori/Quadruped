@@ -73,11 +73,11 @@ def interactive_camera_placement(pos_scale=10.,
     dbg['upAxisIndex'] =  pb.addUserDebugParameter('toggle upAxisIndex', 1, 0, 1)
 
     # for projection matrix
-    dbg['width'] = pb.addUserDebugParameter('width', 0, 100, 64)
-    dbg['height'] = pb.addUserDebugParameter('height', 0, 100, 64)
+    dbg['width'] = pb.addUserDebugParameter('width', 0, 200, 128)
+    dbg['height'] = pb.addUserDebugParameter('height', 0, 200, 128)
     dbg['fov'] = pb.addUserDebugParameter('fov', 1, 180, 90)
     dbg['near_val'] = pb.addUserDebugParameter('near_val', 1e-6, 1, 0.1)
-    dbg['far_val'] = pb.addUserDebugParameter('far_val', 1, 100, 100)
+    dbg['far_val'] = pb.addUserDebugParameter('far_val', 1, 30, 100)
 
     # visual aids for target and camera pose
     '''
@@ -135,26 +135,29 @@ def interactive_camera_placement(pos_scale=10.,
         pb.resetBasePositionAndOrientation(camera_body, cam_pos, cam_quat)
 
         view_mtx = view_mtx.reshape(-1, order='F')
+        '''
         depth_img = (pb.getCameraImage(width, height, view_mtx, proj_mtx)[3]*255).astype(np.uint8)
         img = cv2.resize(depth_img, (display_width, display_height))
         colored = cv2.applyColorMap(img, cv2.COLORMAP_JET)
+        '''
+        img = pb.getCameraImage(width, height, view_mtx, proj_mtx)[2]
+        colored = cv2.resize(img, (display_width, display_height))
         cv2.imshow('depth', colored)
         key = cv2.waitKey(10) & 0xFF
         if key == ord('q'):
             break
         elif key == ord('s'):
             dt = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
+            tensor_rgb = torch.from_numpy(colored)
+            torch.save(tensor_rgb, f"images/images_rgb_pt/{dt}.pt")
+            cv2.imwrite(f"images/images_rgb/{dt}.png", colored)
+        '''
+        elif key == ord('s'):
+            dt = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
             tensor_depth = torch.from_numpy(depth_img)
             torch.save(tensor_depth, f"images/images_pt/{dt}.pt")
             cv2.imwrite(f"images/images_png/{dt}.png", colored)
         '''
-        if show_plot:
-            plt_im.set_array(img)
-            plt.gca().set_aspect(height/width)
-            plt.draw()
-            plt.pause(0.1)
-        '''
-
         if old_print_val != values['print']:
             old_print_val = values['print']
             print("\n========================================")
@@ -192,6 +195,8 @@ def initialize_simulator():
 if __name__ == "__main__":
     # Substitute this for the initialization of your simulator
     client = pb.connect(pb.GUI)
+    pb.setAdditionalSearchPath(pybullet_data.getDataPath())
     ramp = Ramp(client=client)
+    pb.loadURDF("plane.urdf", [0,0,ramp._lowest])
 
     interactive_camera_placement()

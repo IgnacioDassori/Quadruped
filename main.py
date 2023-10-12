@@ -10,7 +10,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "tensor_test"
+    version = "bridge_-15/low_friction"
     # load config from json
     with open(f"tmp/{version}/config.json") as f:
         config = json.load(f)
@@ -47,11 +47,16 @@ if __name__ == "__main__":
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
         cpg = vec_env.envs[0].quadruped.CPG
-        cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d])
+        cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d, cpg._off_h, cpg._off_k])
+        time.sleep(0.002)
         if dones:
             break
+
         
-    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd'])
+    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd', 'off_h', 'off_k'])
+    plt.xlabel('Timestep')
+    plt.ylabel('Parameter Value')
+    plt.title('CPG Parameters over Time')
     plt.legend()
     plt.show()
         
