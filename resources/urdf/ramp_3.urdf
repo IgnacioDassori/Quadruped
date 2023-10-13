@@ -9,14 +9,14 @@
     <link name="base_link">
         <visual> 
             <geometry> 
-                <box size="1 3 0.01"/>
+                <box size="2 3 0.01"/>
                 <origin rpy="0 1 0" xyz="-1 -1 -0.005"/>
             </geometry>
             <material name="grey"/>
         </visual>
         <collision> 
              <geometry> 
-                <box size="1 3 0.01"/>
+                <box size="2 3 0.01"/>
                 <origin rpy="0 1 0" xyz="-1 -1 -0.005"/>
             </geometry>           
         </collision> 
