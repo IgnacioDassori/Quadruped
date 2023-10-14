@@ -1,0 +1,17 @@
+{
+    "freq_obs": [1, 5],
+    "gamma:": 10.0,
+    "environment": "plainCPGEnv-v0",
+    "n_steps": 4096,
+    "batch_size": 512,
+    "policy_kwargs": {
+        "pi": [
+            128,
+            64
+        ],
+        "vf": [
+            128,
+            64
+        ]
+    }
+}

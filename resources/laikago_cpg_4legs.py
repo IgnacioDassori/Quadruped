@@ -62,6 +62,7 @@ class LaikagoCPG:
                       self.CPG._Ak_sw,
                       self.CPG._d
                       ]
+        obs_list = np.array(list(self.ori[0:2])+list(self.vel[1][0:2])+self.motor_positions+cpg_params)
         return np.array(list(self.ori[0:2])+list(self.vel[1][0:2])+self.motor_positions+cpg_params)
     
     def calculate_reward(self, done, timestep):

@@ -47,8 +47,8 @@ for phi in phi_k:
     if theta < 0.5:
         g = -16*(theta**3) + 12*(theta**2)
     else:
-        g = 12*(theta-0.5)**3 - 12*(theta-0.5)**2 + 1
-    gamma.append(max(g,0))
+        g = 16*(theta-0.5)**3 - 12*(theta-0.5)**2 + 1
+    gamma.append(g)
 knee_commands = []
 for i in range(len(gamma)):
     knee_commands.append((ak[i]*gamma[i]+off_k)*(-1))

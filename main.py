@@ -1,5 +1,6 @@
 from stable_baselines3 import PPO
 import gym
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "plainCPG2"
+    version = "plainCPG_recreate3"
 
     # plot the results
     df = pd.read_csv(f"tmp/{version}/monitor.csv", skiprows=1)
@@ -34,6 +35,7 @@ if __name__ == "__main__":
 
     # load PPO model
     model = PPO.load(f"tmp/{version}/best_model.zip")
+    model.policy.training = False
 
     # evaluate model
     obs = vec_env.reset()

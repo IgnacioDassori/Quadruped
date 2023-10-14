@@ -14,18 +14,18 @@ class plainCPGEnv(gym.Env):
         super(plainCPGEnv, self).__init__()
         # CPG parameters (f, Ah, Ak_st, Ak_sw, d)
         self.action_space = gym.spaces.box.Box(
-            low=np.array([5.0, 0.0, 0.0, 0.0, 0.0]),
-            high=np.array([20.0, 1.0, 0.8, 1.0, 1.0])
+            low=np.array([3.0, 0.0, 0.0, 0.0, 0.0]),
+            high=np.array([10.0, 1.0, 0.8, 1.0, 1.0])
         )
         # roll, pitch, angular velocity (x2), motor positions (x8), CPG parameters & phase
         self.observation_space = gym.spaces.box.Box(
             low=np.array([-math.pi, -math.pi, -10.0, -10.0,
                           -1.0, -1.7, -1.0, -1.7, -1.0, -1.7, -1.0, -1.7,
-                          0.0, 5.0, 0.0, 0.0, 0.0, 0.0
+                          0.0, 3.0, 0.0, 0.0, 0.0, 0.0
                           ]),
             high=np.array([math.pi, math.pi, 10.0, 10.0,
                            1.0, 0.3, 1.0, 0.3, 1.0, 0.3, 1.0, 0.3,
-                           2*math.pi, 20.0, 1.0, 0.8, 1.0, 1.0
+                           2*math.pi, 10.0, 1.0, 0.8, 1.0, 1.0
                            ])
         )
         self.client = p.connect(p.GUI)
