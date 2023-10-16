@@ -1,4 +1,6 @@
 import torch
+import os
+from PIL import Image
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import Dataset
@@ -7,36 +9,74 @@ class VAE(nn.Module):
     def __init__(self, in_channels=1, latent_dim=8):
         super(VAE, self).__init__()
         self.latent_dim = latent_dim
-        self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels, 32, 4, 2, 1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(True),
-            nn.Conv2d(32, 64, 4, 2, 1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(True),
-            nn.Conv2d(64, 128, 4, 2, 1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(True),
-            nn.Conv2d(128, 256, 4, 2, 1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(True),
-        )
-        self.fc_mu = nn.Linear(256 * 4 * 4, latent_dim)
-        self.fc_logvar = nn.Linear(256 * 4 * 4, latent_dim)
-        self.fc_decoder = nn.Linear(latent_dim, 256 * 4 * 4)
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(256, 128, 4, 2, 1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(128, 64, 4, 2, 1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(64, 32, 4, 2, 1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(32, in_channels, 4, 2, 1),
-            nn.Sigmoid(),
-        )
+        if in_channels == 1:
+            self.encoder = nn.Sequential(
+                nn.Conv2d(in_channels, 32, 4, 2, 1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(True),
+                nn.Conv2d(32, 64, 4, 2, 1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(True),
+                nn.Conv2d(64, 128, 4, 2, 1),
+                nn.BatchNorm2d(128),
+                nn.ReLU(True),
+                nn.Conv2d(128, 256, 4, 2, 1),
+                nn.BatchNorm2d(256),
+                nn.ReLU(True),
+            )
+            self.fc_mu = nn.Linear(256 * 4 * 4, latent_dim)
+            self.fc_logvar = nn.Linear(256 * 4 * 4, latent_dim)
+            self.fc_decoder = nn.Linear(latent_dim, 256 * 4 * 4)
+            self.decoder = nn.Sequential(
+                nn.ConvTranspose2d(256, 128, 4, 2, 1),
+                nn.BatchNorm2d(128),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(128, 64, 4, 2, 1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(64, 32, 4, 2, 1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(32, in_channels, 4, 2, 1),
+                nn.Sigmoid(),
+            )
+        elif in_channels == 3:
+            self.encoder = nn.Sequential(
+                nn.Conv2d(in_channels, 32, 4, 2, 1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(True),
+                nn.Conv2d(32, 64, 4, 2, 1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(True),
+                nn.Conv2d(64, 128, 4, 2, 1),
+                nn.BatchNorm2d(128),
+                nn.ReLU(True),
+                nn.Conv2d(128, 256, 4, 2, 1),
+                nn.BatchNorm2d(256),
+                nn.ReLU(True),
+                nn.Conv2d(256, 512, 4, 2, 1),
+                nn.BatchNorm2d(512),
+                nn.ReLU(True),
+            )
+            self.fc_mu = nn.Linear(512 * 4 * 4, latent_dim)
+            self.fc_logvar = nn.Linear(512 * 4 * 4, latent_dim)
+            self.fc_decoder = nn.Linear(latent_dim, 512 * 4 * 4)
+            self.decoder = nn.Sequential(
+                nn.ConvTranspose2d(512, 256, 4, 2, 1),
+                nn.BatchNorm2d(256),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(256, 128, 4, 2, 1),
+                nn.BatchNorm2d(128),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(128, 64, 4, 2, 1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(64, 32, 4, 2, 1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(32, in_channels, 4, 2, 1),
+                nn.Sigmoid(),
+            )
         self.optimizer = torch.optim.Adam(self.parameters(), lr=5e-4)
         self.kld_weight = 0.5
     
@@ -49,7 +89,7 @@ class VAE(nn.Module):
     
     def decode(self, z):
         z = self.fc_decoder(z)
-        z = z.view(-1, 256, 4, 4)
+        z = z.view(-1, 512, 4, 4)
         return self.decoder(z)
     
     def reparameterize(self, mu, logvar):
@@ -151,4 +191,19 @@ class DepthDataset(Dataset):
         tensor = torch.load(self.image_path[idx])
         if self.transform:
             tensor = self.transform(tensor)
+        return tensor
+    
+class RGBDataset(Dataset):
+    def __init__(self, image_path, transform=None):
+        self.image_path = image_path
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_path)
+    
+    def __getitem__(self, idx):
+        img_name = self.image_path[idx]
+        image = Image.open(img_name).resize((128, 128)).convert('RGB')
+        if self.transform:
+            tensor = self.transform(image)
         return tensor
