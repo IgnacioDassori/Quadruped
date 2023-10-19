@@ -6,23 +6,25 @@ from torch.nn import functional as F
 from torch.utils.data import Dataset
 
 class VAE(nn.Module):
-    def __init__(self, in_channels=1, latent_dim=8):
+    def __init__(self, in_channels=1, latent_dim=8, lr=5e-4, kld_weight=0.5):
         super(VAE, self).__init__()
         self.latent_dim = latent_dim
+        self.lr = lr
+        self.kld_weight = kld_weight
         if in_channels == 1:
             self.encoder = nn.Sequential(
                 nn.Conv2d(in_channels, 32, 4, 2, 1),
                 nn.BatchNorm2d(32),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(32, 64, 4, 2, 1),
                 nn.BatchNorm2d(64),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(64, 128, 4, 2, 1),
                 nn.BatchNorm2d(128),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(128, 256, 4, 2, 1),
                 nn.BatchNorm2d(256),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
             )
             self.fc_mu = nn.Linear(256 * 4 * 4, latent_dim)
             self.fc_logvar = nn.Linear(256 * 4 * 4, latent_dim)
@@ -30,13 +32,13 @@ class VAE(nn.Module):
             self.decoder = nn.Sequential(
                 nn.ConvTranspose2d(256, 128, 4, 2, 1),
                 nn.BatchNorm2d(128),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(128, 64, 4, 2, 1),
                 nn.BatchNorm2d(64),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(64, 32, 4, 2, 1),
                 nn.BatchNorm2d(32),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(32, in_channels, 4, 2, 1),
                 nn.Sigmoid(),
             )
@@ -44,19 +46,19 @@ class VAE(nn.Module):
             self.encoder = nn.Sequential(
                 nn.Conv2d(in_channels, 32, 4, 2, 1),
                 nn.BatchNorm2d(32),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(32, 64, 4, 2, 1),
                 nn.BatchNorm2d(64),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(64, 128, 4, 2, 1),
                 nn.BatchNorm2d(128),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(128, 256, 4, 2, 1),
                 nn.BatchNorm2d(256),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.Conv2d(256, 512, 4, 2, 1),
                 nn.BatchNorm2d(512),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
             )
             self.fc_mu = nn.Linear(512 * 4 * 4, latent_dim)
             self.fc_logvar = nn.Linear(512 * 4 * 4, latent_dim)
@@ -64,21 +66,21 @@ class VAE(nn.Module):
             self.decoder = nn.Sequential(
                 nn.ConvTranspose2d(512, 256, 4, 2, 1),
                 nn.BatchNorm2d(256),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(256, 128, 4, 2, 1),
                 nn.BatchNorm2d(128),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(128, 64, 4, 2, 1),
                 nn.BatchNorm2d(64),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(64, 32, 4, 2, 1),
                 nn.BatchNorm2d(32),
-                nn.ReLU(True),
+                nn.LeakyReLU(),
                 nn.ConvTranspose2d(32, in_channels, 4, 2, 1),
-                nn.Sigmoid(),
+                nn.Tanh(),
             )
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=5e-4)
-        self.kld_weight = 0.5
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        
     
     def encode(self, x):
         x = self.encoder(x)
@@ -104,7 +106,8 @@ class VAE(nn.Module):
     
     def loss_function(self, recon_x, x, mu, logvar):
         REL = F.mse_loss(recon_x, x, reduction="sum")
-        KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        #KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        KLD = torch.mean(-0.5 * torch.sum(1 + logvar - mu ** 2 - logvar.exp(), dim = 1), dim = 0)
         return REL + KLD*self.kld_weight
     
 class DeepAutoencoder(nn.Module):
@@ -114,29 +117,29 @@ class DeepAutoencoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels, 32, 4, 2, 1),
             nn.BatchNorm2d(32),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Conv2d(32, 64, 4, 2, 1),
             nn.BatchNorm2d(64),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Conv2d(64, 128, 4, 2, 1),
             nn.BatchNorm2d(128),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Conv2d(128, 256, 4, 2, 1),
             nn.BatchNorm2d(256),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
         )
         self.latent_fc = nn.Linear(256 * 4 * 4, latent_dim)
         self.decoder_fc = nn.Linear(latent_dim, 256 * 4 * 4)
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(256, 128, 4, 2, 1),
             nn.BatchNorm2d(128),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(128, 64, 4, 2, 1),
             nn.BatchNorm2d(64),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(64, 32, 4, 2, 1),
             nn.BatchNorm2d(32),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(32, in_channels, 4, 2, 1),
             nn.Sigmoid(),
         )
@@ -155,20 +158,20 @@ class AutoencoderFC(nn.Module):
         self.latent_dim = latent_dim
         self.encoder = nn.Sequential(
             nn.Linear(64 * 64, 256),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Linear(256, 128),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Linear(128, 64),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Linear(64, latent_dim),
         )
         self.decoder = nn.Sequential(
             nn.Linear(latent_dim, 64),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Linear(64, 128),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Linear(128, 256),
-            nn.ReLU(True),
+            nn.LeakyReLU(),
             nn.Linear(256, 64 * 64),
             nn.Sigmoid(),
         )

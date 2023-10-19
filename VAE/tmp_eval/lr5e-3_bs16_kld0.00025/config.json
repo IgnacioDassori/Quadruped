@@ -1,0 +1,22 @@
+{
+    "in_channels": 3,
+    "latent_dim": 16,
+    "layers": [
+        32,
+        64,
+        128,
+        256,
+        512
+    ],
+    "activation": "LeakyReLU",
+    "batch_norm": "BatchNorm2d",
+    "output_activation": "Tanh",
+    "lr": 0.005,
+    "kld_weight": 0.00025,
+    "batch_size": 16,
+    "transforms": [
+        "RandomVerticalFlip",
+        "RandomHorizontalFlip"
+    ],
+    "lowest_loss": 1684.7880859375
+}
