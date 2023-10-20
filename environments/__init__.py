@@ -1,26 +1,6 @@
 from gym.envs.registration import register
 
 register(
-    id='slopeQuadruped-v1',
-    entry_point='environments.SlopeQuadrupedv1:SlopeQuadrupedEnv'
-)
-
-register(
-    id='plainQuadruped-v0',
-    entry_point='environments.plainQuadrupedv0:plainEnv'
-)
-
-register(
-    id='plainQuadruped-v1',
-    entry_point='environments.plainQuadrupedv1:plainEnv'
-)
-
-register(
-    id='plainQuadruped-v2',
-    entry_point='environments.plainQuadrupedv2:plainEnv'
-)
-
-register(
     id='plainCPGEnv-v0',
     entry_point='environments.plainCPG:plainCPGEnv',
     kwargs={'mode': 0, 'freq_range': [3.0, 8.0], 'gamma': 5.0}
@@ -36,4 +16,10 @@ register(
     id='plainCPGEnv-v1',
     entry_point='environments.plainCPG_v1:plainCPGEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
+)
+
+register(
+    id='fullEnv-v0',
+    entry_point='environments.fullEnvironment:fullEnv',
+    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}    
 )

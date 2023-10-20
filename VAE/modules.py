@@ -6,7 +6,7 @@ from torch.nn import functional as F
 from torch.utils.data import Dataset
 
 class VAE(nn.Module):
-    def __init__(self, in_channels=1, latent_dim=8, lr=5e-4, kld_weight=0.5):
+    def __init__(self, in_channels=3, latent_dim=16, lr=5e-3, kld_weight=0.00025):
         super(VAE, self).__init__()
         self.latent_dim = latent_dim
         self.lr = lr
