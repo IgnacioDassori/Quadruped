@@ -24,9 +24,14 @@ class CPG:
         self._Ak_st = np.random.uniform(0.01, 0.2)
         self._Ak_sw = np.random.uniform(0.3, 0.7)
         self._d = np.random.uniform(0.3, 0.7)
-        # offsets
+        '''
+        # original offsets
         self._off_h = 0.2 # 0.2 for 2 leg CPG version
         self._off_k = 0.5 # 0.5 for 2 leg CPG version
+        '''
+        # new offsets
+        self._off_h = 0.0
+        self._off_k = 0.7
         '''
         TRY LATER
         # offsets
@@ -58,9 +63,12 @@ class CPG:
             else:
                 phi_h = (phi + 2*math.pi*(1-2*self._d))/(2*(1-self._d))
             # hip angle
-            hip_angle = self._Ah*math.cos(phi_h) 
+            hip_angle = self._Ah*math.cos(phi_h)
+            '''
             if i<2:
                 hip_angle += self._off_h
+            '''
+            hip_angle += self._off_h    
             motor_angles.append(hip_angle)
             # knee amplitude
             phi_k = (phi_h) % (2*math.pi)

@@ -23,3 +23,9 @@ register(
     entry_point='environments.fullEnvironment:fullEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}    
 )
+
+register(
+    id='plainCPGEnv-v2',
+    entry_point='environments.plainCPG_v2:plainCPGEnv',
+    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
+)

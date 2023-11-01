@@ -31,7 +31,7 @@ class LaikagoCPG:
         self.vel = None
         self.start = start
         self.last_pos = start
-        self.max_episode_length = 5000
+        self.max_episode_length = 10000
         self.goal = 10.0
 
     def spawn(self, pitch=0, z=0.44):
@@ -86,7 +86,7 @@ class LaikagoCPG:
         image = transforms.ToTensor()(image).unsqueeze(0)
         with torch.no_grad():
             mu, logvar = encoder.encode(image)
-        return encoder.reparameterize(mu, logvar)
+        return mu
     
     def get_image(self):
         # position and orientation of the agent

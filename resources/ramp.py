@@ -18,7 +18,7 @@ class Ramp:
 
         #Parameters
         self._maxPitch = 15*math.pi/180
-        self._minPitch = 5*math.pi/180
+        self._minPitch = 10*math.pi/180
         self.generate()
 
     def generate(self):
@@ -32,7 +32,7 @@ class Ramp:
 
     def init_ramp(self):
         self.random_pitch()
-        self._L = random.randint(2, 4)
+        self._L = random.randint(2, 3)
         self._fname = os.path.join(os.path.dirname(__file__), f'urdf/ramp_{self._L}.urdf')
         bPosition = self.getBasePosition()
         bOrientation = p.getQuaternionFromEuler([self._pitch, 0, 0])
@@ -46,7 +46,8 @@ class Ramp:
             self._pitch = 0.0
             self._currentType = 0
         else:
-            sign = random.choice([1, -1])
+            sign = 1
+            # sign = random.choice([1, -1])
             self._pitch = sign*random.uniform(self._minPitch, self._maxPitch)
             self._currentType = 1
 
@@ -62,7 +63,7 @@ class Ramp:
     
 class Bridge:
     def __init__(self, client, pitch=None):
-        self._fname = os.path.join(os.path.dirname(__file__), 'bridge.urdf')
+        self._fname = os.path.join(os.path.dirname(__file__), 'urdf/bridge.urdf')
         self._client = client
         if pitch is None:
             self.pitch = random.uniform(-math.pi/12, math.pi/12) # uniform between -20 and 20 degrees

@@ -1,16 +1,17 @@
 from stable_baselines3 import PPO
 import gym
+import pybullet as p
 import numpy as np
 import pandas as pd
 import time
 import json
 import matplotlib.pyplot as plt
-from environments.plainCPG import plainCPGEnv
+from environments.plainCPG_v1 import plainCPGEnv
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "bridge_-15/low_friction"
+    version = "plainCPG_v2/no_falling"
     # load config from json
     with open(f"tmp/{version}/config.json") as f:
         config = json.load(f)
@@ -32,7 +33,11 @@ if __name__ == "__main__":
 
     # load trained vector environment
     gym_env = config['env']
-    vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'])])
+    use_vae = False
+    if use_vae:
+        vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'], vae_path=config['vae_path'])])
+    else:
+        vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'])])
     vec_env = VecNormalize.load(f"tmp/{version}/vec_normalize.pkl", vec_env)
     vec_env.training = False
     vec_env.norm_reward = False
@@ -43,20 +48,42 @@ if __name__ == "__main__":
     # evaluate model
     obs = vec_env.reset()
     cpg_params = []
-    for i in range(10000):
+    motor_positions = []
+    R = []
+    poses = []
+    vel = []
+    for i in range(20000):
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
-        cpg = vec_env.envs[0].quadruped.CPG
-        cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d, cpg._off_h, cpg._off_k])
+        pos = vec_env.envs[0].quadruped.pos
+        poses.append(pos)
+        R.append(rewards[0])
+        quadruped = vec_env.envs[0].quadruped
+        cpg = quadruped.CPG
+        mp = []
+        for id in quadruped.jointIds:
+            mp.append(p.getJointState(quadruped.laikago, id)[0])
+        motor_positions.append(mp)
+        #cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d, cpg._off_h_b, cpg._off_k_b, cpg._off_h_f, cpg._off_k_f])
         time.sleep(0.002)
         if dones:
+            rew = sum([0.99**i * r for i, r in enumerate(R)])
+            print(rew)
+            for i in range(len(poses)-1):
+                vel.append((poses[i+1][1]-poses[i][1])/0.002)
+            print(vel)
             break
 
-        
-    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd', 'off_h', 'off_k'])
+    '''
+    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd', 'off_h_b', 'off_k_b', 'off_h_f', 'off_k_f'])
     plt.xlabel('Timestep')
     plt.ylabel('Parameter Value')
     plt.title('CPG Parameters over Time')
     plt.legend()
     plt.show()
+    
         
+    plt.plot(motor_positions, label=['fl_hip', 'fl_knee', 'fr_hip', 'fr_knee', 'bl_hip', 'bl_knee', 'br_hip', 'br_knee'])
+    plt.legend()
+    plt.show()
+    '''

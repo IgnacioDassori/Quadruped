@@ -6,7 +6,7 @@ from resources.cpg import CPG
 
 class LaikagoCPG:
     '''
-    FINAL VERSION WITH GOOD REWARD
+    DOESNT CONSIDER OFFSETS
     '''
     def __init__(self, client, start= 0.0, dt=1./500, gamma=5.0):
         self.client = client

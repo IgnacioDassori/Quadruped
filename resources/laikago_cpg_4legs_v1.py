@@ -6,7 +6,7 @@ from resources.cpg import CPG
 
 class LaikagoCPG:
     '''
-    THIS VERSION GOES WITH "plainCPG_v1.py" ENVIRONMENT
+    THIS VERSION GOES WITH "plainCPG_v1.py" ENVIRONMENT. CONSIDERES OFFSETS
     '''
     def __init__(self, client, start= 0.0, dt=1./500, gamma=5.0):
         self.client = client
@@ -102,7 +102,12 @@ class LaikagoCPG:
     
     def calculate_reward_2(self):
 
-        pass
+        current_pos = self.pos[1]
+        vcap = 1.0
+        velocity= (current_pos - self.last_pos)/0.002
+        self.last_pos = current_pos
+
+        return max(-vcap, min(velocity, vcap))
     
     def is_done(self, timestep):
         # robot falls

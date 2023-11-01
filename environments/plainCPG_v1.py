@@ -14,18 +14,18 @@ class plainCPGEnv(gym.Env):
         super(plainCPGEnv, self).__init__()
         # CPG parameters (f, Ah, Ak_st, Ak_sw, d, off_h, off_k)
         self.action_space = gym.spaces.box.Box(
-            low=np.array([0, 0.0, 0.0, 0.0, 0.05, 0.0, 0.3]),
-            high=np.array([1.0, 1.0, 0.8, 1.0, 0.95, 0.4, 0.7])
+            low=np.array([0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.3]),
+            high=np.array([1.0, 1.0, 0.5, 1.0, 0.95, 0.4, 0.7])
         )
         # roll, pitch, angular velocity (x2), motor positions (x8), phase & CPG parameters
         self.observation_space = gym.spaces.box.Box(
             low=np.array([-math.pi, -math.pi, -10.0, -10.0,
                           -1.0, -1.7, -1.0, -1.7, -1.0, -1.7, -1.0, -1.7,
-                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.3
                           ]),
             high=np.array([math.pi, math.pi, 10.0, 10.0,
                            1.0, 0.3, 1.0, 0.3, 1.0, 0.3, 1.0, 0.3,
-                           2*math.pi, 10.0, 1.0, 0.8, 1.0, 1.0, 0.4, 0.7
+                           2*math.pi, 10.0, 1.0, 0.5, 1.0, 0.95, 0.4, 0.7
                            ])
         )
         # start in GUI or DIRECT mode
@@ -49,7 +49,7 @@ class plainCPGEnv(gym.Env):
         p.stepSimulation()
         obs = self.quadruped.get_observation()
         done = self.quadruped.is_done(self.timestep)
-        rew = self.quadruped.calculate_reward(done, self.timestep)
+        rew = self.quadruped.calculate_reward_2()
         info = {}
         self.timestep += 1
         return obs, rew, done, info

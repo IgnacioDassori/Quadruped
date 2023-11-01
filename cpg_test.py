@@ -17,7 +17,7 @@ end_time = 1
 t = np.linspace(0, end_time, timesteps)
 Phi = np.array([(2*math.pi*f*i*t[1])%(2*math.pi) for i in range(timesteps)])
 
-Ah = 0.6
+Ah = 0.3
 phi_h = []
 for phi in Phi:
     phi = phi % (2*math.pi)
@@ -31,8 +31,8 @@ for phi in phi_h:
 
 # KNEE JOINT
 phi_k = phi_h # can add offset later
-Ak_st = 0.5
-Ak_sw = 0.8
+Ak_st = 0.1
+Ak_sw = 0.5
 ak = []
 for phi in phi_k:
     if phi <  math.pi:
@@ -66,7 +66,7 @@ axes[1].set_xlabel("Time (s)")
 axes[1].set_ylabel("Angle (rad)")
 plt.show()
 
-
+'''
 # animation of trajectory
 Ru = 0.5 # radius upper leg
 Rl = 0.3 # radius lower leg
@@ -100,3 +100,4 @@ def update(frame):
 # Create the animation
 ani = FuncAnimation(fig, update, frames=timesteps, blit=True, interval=2)
 plt.show()
+'''

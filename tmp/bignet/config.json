@@ -1,1 +1,0 @@
-{"env": "plainCPGEnv-v0", "lr": 0.0002, "n_steps": 32768, "batch_size": 4096, "policy_kwargs": {"pi": [256, 128], "vf": [256, 128]}, "total_timesteps": 2500000, "freq_range": [1, 10], "gamma": 5.0}

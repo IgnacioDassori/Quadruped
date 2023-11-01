@@ -29,7 +29,7 @@ quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
 quadruped = p.loadURDF("laikago/laikago_toes.urdf",[0,0,0.44],quat, flags = urdfFlags,useFixedBase=False)
 
 jointIds=[1, 2, 5, 6, 9, 10, 13, 14]
-initial_motor_positions = [0, 0.0, 0, 0.0, 0, 0.0, 0, 0.0]
+initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]
 
 for i, position in zip(jointIds, initial_motor_positions):
 	p.resetJointState(quadruped, jointIndex=i, targetValue=position)
@@ -54,10 +54,11 @@ jointOffsets=[]
 jointDirections=[-1,1,1,1,1,1,-1,1,1,1,1,1]
 jointAngles=[0,0,0,0,0,0,0,0,0,0,0,0]
 
+
 for i in range (4):
 	jointOffsets.append(0)
-	jointOffsets.append(-0.7)
-	jointOffsets.append(0.7)
+	jointOffsets.append(0)
+	jointOffsets.append(0)
 
 maxForceId = p.addUserDebugParameter("maxForce",0,100,20)
 
