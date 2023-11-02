@@ -29,3 +29,9 @@ register(
     entry_point='environments.plainCPG_v2:plainCPGEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
 )
+
+register(
+    id='modulatingEnv-v0',
+    entry_point='environments.modulating:modulatingEnv',
+    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
+)

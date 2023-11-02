@@ -14,13 +14,13 @@ if __name__ == "__main__":
 
     # create log directory
 
-    log_dir = "tmp/plainCPG_v2/no_falling"
+    log_dir = "tmp/modulating/first_test"
     os.makedirs(log_dir, exist_ok=True) 
 
     # create quadruped environment
     freq_range = [1.5, 5]
     gamma = 10.0
-    environment = 'plainCPGEnv-v2'
+    environment = 'modulatingEnv-v0'
     use_vae = False
     vae = 'lr5e-3_bs16_kld0.00025'
     vae_path = os.path.join("VAE/tmp_eval", vae)
