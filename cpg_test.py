@@ -4,9 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import pybullet as p
 
-a = [0, 1, 2, 3, 4]
-print(a[:2])
-print(a[2:])
+import torch
+print(torch.cuda.is_available())
 
 # GLOBAL PARAMETERS
 f = 5.0

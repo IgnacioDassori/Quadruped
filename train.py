@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # create log directory
 
-    log_dir = "tmp/modulating/first_test"
+    log_dir = "tmp/modulating/falling_ranges_plainv1_-0.1_0.1_try2"
     os.makedirs(log_dir, exist_ok=True) 
 
     # create quadruped environment
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     if use_vae:
         env = DummyVecEnv([lambda: gym.make(environment, mode=0, freq_range=freq_range, gamma=gamma, vae_path=vae_path)])
     else:
-        env = DummyVecEnv([lambda: gym.make(environment, mode=0, freq_range=freq_range, gamma=gamma)])
+        env = DummyVecEnv([lambda: gym.make(environment, mode=1, freq_range=freq_range, gamma=gamma)])
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
     for i in range(env.num_envs):
         env.envs[i] = Monitor(env.envs[i], log_dir)
@@ -36,9 +36,9 @@ if __name__ == "__main__":
     n_steps = 4096*4
     batch_size = 512*2
     lr = 0.0003
-    tot_timesteps = 3000000
+    tot_timesteps = 5000000
     activation = nn.Tanh
-    custom_arch = dict(pi=[128, 128], vf=[128, 128])
+    custom_arch = dict(pi=[200, 200], vf=[200, 200])
     model = PPO("MlpPolicy", env, verbose=1, device="cuda", learning_rate=lr ,n_steps=n_steps, batch_size=batch_size,
                 policy_kwargs=dict(activation_fn=activation,net_arch=custom_arch), tensorboard_log=log_dir)
 

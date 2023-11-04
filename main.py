@@ -6,12 +6,12 @@ import pandas as pd
 import time
 import json
 import matplotlib.pyplot as plt
-from environments.plainCPG_v1 import plainCPGEnv
+from environments.modulating import modulatingEnv
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "modulating/first_test"
+    version = "modulating/falling_ranges_plainv1_-0.1_0.1_try2"
     # load config from json
     with open(f"tmp/{version}/config.json") as f:
         config = json.load(f)
@@ -64,15 +64,16 @@ if __name__ == "__main__":
         for id in quadruped.jointIds:
             mp.append(p.getJointState(quadruped.laikago, id)[0])
         motor_positions.append(mp)
-        #cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d, cpg._off_h_b, cpg._off_k_b, cpg._off_h_f, cpg._off_k_f])
+        cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d, cpg._off_h, cpg._off_k])
         if dones:
             rew = sum([0.99**i * r for i, r in enumerate(R)])
             for i in range(len(poses)-1):
                 vel.append((poses[i+1][1]-poses[i][1])/0.002)
-            break
+            #break
+            
 
-    '''
-    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd', 'off_h_b', 'off_k_b', 'off_h_f', 'off_k_f'])
+    
+    plt.plot(cpg_params, label=['f', 'Ah', 'Ak_st', 'Ak_sw', 'd', 'off_h', 'off_k'])
     plt.xlabel('Timestep')
     plt.ylabel('Parameter Value')
     plt.title('CPG Parameters over Time')
@@ -83,4 +84,4 @@ if __name__ == "__main__":
     plt.plot(motor_positions, label=['fl_hip', 'fl_knee', 'fr_hip', 'fr_knee', 'bl_hip', 'bl_knee', 'br_hip', 'br_knee'])
     plt.legend()
     plt.show()
-    '''
+    

@@ -29,6 +29,7 @@ class LaikagoCPG:
         self.last_pos = start
         self.max_episode_length = 5000
         self.goal = 5.0
+        self.modulation_range = [-0.1, 0.1]
 
     def spawn(self, pitch=0, z=0.44):
         quat = p.getQuaternionFromEuler([math.pi/2-pitch,0,math.pi])
@@ -42,7 +43,8 @@ class LaikagoCPG:
     def apply_action(self, action):
         # update CPG parameters
         cpg_params = action[:7]
-        motor_corrections = action[7:]
+        motor_corrections = [a*(self.modulation_range[1]-self.modulation_range[0]) + self.modulation_range[0] for a in action[7:]]
+        #motor_corrections = action[7:]
         self.CPG.update(cpg_params)
         # get CPG motor positions
         motor_angles = self.CPG.get_angles()
@@ -90,9 +92,9 @@ class LaikagoCPG:
             else: 
                 return -1000 + timestep/(self.max_episode_length/1000)
         
-        #falling = (abs(a_vel[0])>2.0)
+        falling = (abs(a_vel[0])>2.0)
 
-        return 10*(l_vel[1]) - (abs(a_vel[1])+abs(a_vel[2]))
+        return 10*(l_vel[1])*(1-falling) - (abs(a_vel[1])+abs(a_vel[2]))
     
     def calculate_reward_2(self):
 

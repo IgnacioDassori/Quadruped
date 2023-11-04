@@ -11,15 +11,15 @@ class modulatingEnv(gym.Env):
     PLAIN ENVIRONMENT THAT ADDS MODULATION OF CPG OUTPUTS. GOES WITH LAIKAGO_MODULATING
     CPG WITHOUT DIFFERENT OFFSETS FOR BACK AND FRONT LEGS
     '''
-    def __init__(self, mode=0, freq_range=[1.5, 5.0], gamma=10.0):
+    def __init__(self, mode=0, freq_range=[3.0, 8.0], gamma=5.0):
         super(modulatingEnv, self).__init__()
         # CPG parameters (f, Ah, Ak_st, Ak_sw, d, off_h, off_k) (x7)
         # Motor position correction (x8)
         self.action_space = gym.spaces.box.Box(
             low=np.array([0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.3,
-                          -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5]),
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
             high=np.array([1.0, 1.0, 0.5, 1.0, 0.95, 0.4, 0.7,
-                           0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+                           1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
         )
         # roll, pitch, angular velocity (x4), motor positions (x8), phase & CPG parameters (x8)
         self.observation_space = gym.spaces.box.Box(
