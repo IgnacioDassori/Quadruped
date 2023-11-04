@@ -28,7 +28,7 @@ class LaikagoCPG:
         self.start = start
         self.last_pos = start
         self.max_episode_length = 5000
-        self.goal = 5.0
+        self.goal = 10.0
         self.modulation_range = [-0.1, 0.1]
 
     def spawn(self, pitch=0, z=0.44):
@@ -113,6 +113,11 @@ class LaikagoCPG:
         # robot reaches goal
         if self.pos[1]>self.goal:
             return True
+        
+        # test condition: Robot moves to the side too much
+        if abs(self.pos[0]) > 0.5:
+            return True
+
         # maximum episode length
         if timestep >= self.max_episode_length:
             return True

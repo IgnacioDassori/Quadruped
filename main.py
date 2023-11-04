@@ -55,6 +55,7 @@ if __name__ == "__main__":
     for i in range(20000):
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
+        time.sleep(0.001)
         pos = vec_env.envs[0].quadruped.pos
         poses.append(pos)
         R.append(rewards[0])
