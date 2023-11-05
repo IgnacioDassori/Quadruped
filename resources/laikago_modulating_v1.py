@@ -9,9 +9,10 @@ from resources.cpg import CPG
 
 class LaikagoCPG:
     '''
-    THIS VERSION GOES WITH "fullEnvironment.py" ENVIRONMENT
+    VERSION THAT INCLUDES MODULATION AND VAE FOR SLOPE ENVIRONMENT.
+    GOES WITH MODULATING_V1.PY ENVIRONMENT
     '''
-    def __init__(self, client, start=0.0, dt=1./500, gamma=10.0):
+    def __init__(self, client, start= 0.0, dt=1./500, gamma=5.0):
         self.client = client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         self.laikago = None
@@ -24,14 +25,14 @@ class LaikagoCPG:
             self.jointIds.append(i+2)
             i+=4
         self.CPG = CPG(dt, gamma)
-        self.latent = None
         self.pos = None
         self.ori = None
         self.vel = None
         self.start = start
         self.last_pos = start
-        self.max_episode_length = 10000
+        self.max_episode_length = 5000
         self.goal = 10.0
+        self.modulation_range = [-0.1, 0.1]
 
     def spawn(self, pitch=0, z=0.44):
         quat = p.getQuaternionFromEuler([math.pi/2-pitch,0,math.pi])
@@ -44,7 +45,10 @@ class LaikagoCPG:
 
     def apply_action(self, action):
         # update CPG parameters
-        self.CPG.update(action)
+        cpg_params = action[:7]
+        motor_corrections = [a*(self.modulation_range[1]-self.modulation_range[0]) + self.modulation_range[0] for a in action[7:]]
+        #motor_corrections = action[7:]
+        self.CPG.update(cpg_params)
         # get CPG motor positions
         motor_angles = self.CPG.get_angles()
         for motor_id, i in zip(self.jointIds, range(len(motor_angles))):
@@ -52,7 +56,7 @@ class LaikagoCPG:
                 self.laikago,
                 motor_id,
                 p.POSITION_CONTROL,
-                targetPosition=motor_angles[i],
+                targetPosition=motor_angles[i] + motor_corrections[i],
                 force=30,
             )
 
@@ -115,9 +119,13 @@ class LaikagoCPG:
     def calculate_reward(self, done, timestep):
 
         current_pos = self.pos[1]
-        a_vel = self.vel[1]
-        l_vel = self.vel[0]
 
+        # angular velocities
+        a_vel = self.vel[1]
+        
+        # linear velocity
+        l_vel = self.vel[0]
+        
         # if early termination (proportional to how early it was)
         if done:
             if current_pos > self.goal:
@@ -131,7 +139,11 @@ class LaikagoCPG:
     
     def calculate_reward_2(self):
 
-        pass
+        current_pos = self.pos[1]
+        vcap = 1.5
+        velocity= (current_pos - self.last_pos)/0.002
+
+        return max(-vcap, min(velocity, vcap))
     
     def is_done(self, timestep):
         # robot falls
@@ -142,6 +154,11 @@ class LaikagoCPG:
         # robot reaches goal
         if self.pos[1]>self.goal:
             return True
+        
+        # test condition: Robot moves to the side too much
+        if abs(self.pos[0]) > 0.5:
+            return True
+
         # maximum episode length
         if timestep >= self.max_episode_length:
             return True

@@ -14,20 +14,20 @@ if __name__ == "__main__":
 
     # create log directory
 
-    log_dir = "tmp/modulating/walk_straight"
+    log_dir = "tmp/modulating_v1/test"
     os.makedirs(log_dir, exist_ok=True) 
 
     # create quadruped environment
     freq_range = [1.5, 5]
     gamma = 10.0
-    environment = 'modulatingEnv-v0'
-    use_vae = False
+    environment = 'modulatingEnv-v1'
+    use_vae = True
     vae = 'lr5e-3_bs16_kld0.00025'
     vae_path = os.path.join("VAE/tmp_eval", vae)
     if use_vae:
         env = DummyVecEnv([lambda: gym.make(environment, mode=0, freq_range=freq_range, gamma=gamma, vae_path=vae_path)])
     else:
-        env = DummyVecEnv([lambda: gym.make(environment, mode=0, freq_range=freq_range, gamma=gamma)])
+        env = DummyVecEnv([lambda: gym.make(environment, mode=1, freq_range=freq_range, gamma=gamma)])
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
     for i in range(env.num_envs):
         env.envs[i] = Monitor(env.envs[i], log_dir)
