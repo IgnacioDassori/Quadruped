@@ -17,7 +17,15 @@ class CPG:
         self._Ah = np.random.uniform(0.1, 0.5)
         self._Ak_st = np.random.uniform(0.01, 0.2)
         self._Ak_sw = np.random.uniform(0.3, 0.7)
-        self._d = np.random.uniform(0.3, 0.7)
+        self._d = np.random.uniform(0.5, 0.7)
+        '''
+        # SMALLER RANGE OF STARTING VALUES
+        self._f = np.random.uniform(2.5, 4.0)
+        self._Ah = np.random.uniform(0.1, 0.3)
+        self._Ak_st = np.random.uniform(0.01, 0.1)
+        self._Ak_sw = np.random.uniform(0.3, 0.5)
+        self._d = np.random.uniform(0.5, 0.7)
+        '''
         # offsets
         self._off_h_b = 0.0
         self._off_k_b = 0.7

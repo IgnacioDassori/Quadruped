@@ -17,8 +17,8 @@ class Ramp:
         self._currentType = 0 #0: no slope, 1: with slope
 
         #Parameters
-        self._maxPitch = 15*math.pi/180
-        self._minPitch = 10*math.pi/180
+        self._maxPitch = 10*math.pi/180
+        self._minPitch = 5*math.pi/180
         self.generate()
 
     def generate(self):

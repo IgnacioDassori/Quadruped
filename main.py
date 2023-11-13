@@ -11,7 +11,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "modulating/walk_straight"
+    version = "modulating_v1/new_net"
     # load config from json
     with open(f"tmp/{version}/config.json") as f:
         config = json.load(f)
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     # load trained vector environment
     gym_env = config['env']
-    use_vae = False
+    use_vae = config['use_vae']
     if use_vae:
         vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'], vae_path=config['vae_path'])])
     else:
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     for i in range(20000):
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
-        #time.sleep(0.001)
+        time.sleep(0.002)
         pos = vec_env.envs[0].quadruped.pos
         poses.append(pos)
         R.append(rewards[0])

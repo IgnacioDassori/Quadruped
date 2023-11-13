@@ -5,12 +5,12 @@ import math
 import torch
 from PIL import Image
 from torchvision import transforms
-from resources.cpg import CPG
+from resources.cpg_v1 import CPG
 
 class LaikagoCPG:
     '''
-    VERSION THAT INCLUDES MODULATION AND VAE FOR SLOPE ENVIRONMENT.
-    GOES WITH MODULATING_V1.PY ENVIRONMENT
+    VERSION THAT INCLUDES MODULATION OF MOTOR POSITIONS. 
+    DOESNT USE VAE, IN SLOPE ENVIRONMENT
     '''
     def __init__(self, client, start= 0.0, dt=1./500, gamma=5.0):
         self.client = client
@@ -46,9 +46,8 @@ class LaikagoCPG:
 
     def apply_action(self, action):
         # update CPG parameters
-        cpg_params = action[:7]
-        motor_corrections = [a*(self.modulation_range[1]-self.modulation_range[0]) + self.modulation_range[0] for a in action[7:]]
-        #motor_corrections = action[7:]
+        cpg_params = action[:9]
+        motor_corrections = [a*(self.modulation_range[1]-self.modulation_range[0]) + self.modulation_range[0] for a in action[9:]]
         self.CPG.update(cpg_params)
         # get CPG motor positions
         motor_angles = self.CPG.get_angles()
@@ -76,11 +75,12 @@ class LaikagoCPG:
                       self.CPG._Ak_st,
                       self.CPG._Ak_sw,
                       self.CPG._d,
-                      self.CPG._off_h,
-                      self.CPG._off_k
+                      self.CPG._off_h_b,
+                      self.CPG._off_k_b,
+                      self.CPG._off_h_f,
+                      self.CPG._off_k_f
                       ]
-        observation = np.array(list(self.ori[0:2])+list(self.vel[1][0:2])+self.motor_positions+cpg_params)
-        return np.concatenate((observation, self.latent))
+        return np.array(list(self.ori[0:2])+list(self.vel[1][0:2])+self.motor_positions+cpg_params)
     
     def get_latent_vector(self, encoder):
         # get latent vector from VAE, return as numpy array
@@ -116,7 +116,7 @@ class LaikagoCPG:
         # get camera image
         image = p.getCameraImage(width=128, height=128, viewMatrix=view_matrix, projectionMatrix=projection_matrix)[2]    
         return Image.fromarray(image).convert('RGB')
-    
+
     def calculate_reward(self, done, timestep):
 
         current_pos = self.pos[1]

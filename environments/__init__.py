@@ -41,3 +41,9 @@ register(
     entry_point='environments.modulating_v1:modulatingEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}
 )
+
+register(
+    id='modulatingEnv-v2',
+    entry_point='environments.modulating_v2:modulatingEnv',
+    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}
+)
