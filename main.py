@@ -11,7 +11,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "modulating_v1/new_net"
+    version = "modulating_v1_bridge/bigger_updates"
     # load config from json
     with open(f"tmp/{version}/config.json") as f:
         config = json.load(f)

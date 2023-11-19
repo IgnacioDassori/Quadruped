@@ -8,7 +8,7 @@ class Ramp:
         self._L = 2
         self._fname = os.path.join(os.path.dirname(__file__), f'urdf/ramp_{self._L}.urdf')
         self._client = client
-        self.path_leght = 3
+        self.path_leght = 5
         # Lenght of segments
         self._ycord = self._L-1
         self._height = 0.0
@@ -66,13 +66,13 @@ class Bridge:
         self._fname = os.path.join(os.path.dirname(__file__), 'urdf/bridge.urdf')
         self._client = client
         if pitch is None:
-            self.pitch = random.uniform(-math.pi/12, math.pi/12) # uniform between -20 and 20 degrees
+            self.pitch = random.uniform(0, math.pi/18) # uniform between 0 and 10 degrees
         else:
             self.pitch = pitch
+        self.x_start = 4 - 5*math.sqrt(1-math.tan(self.pitch)**2)
         pos = [0, 4, 5*math.tan(self.pitch)]
         ori = p.getQuaternionFromEuler([self.pitch, 0, 0])
         p.loadURDF(fileName=self._fname, basePosition=pos, baseOrientation=ori, physicsClientId = self._client)
     
     def get_status(self):
-        x_start = 4 - 5*math.sqrt(1-math.tan(self.pitch)**2)
-        return self.pitch, -x_start*math.tan(self.pitch) + 0.44/math.cos(self.pitch)
+        return self.pitch, -self.x_start*math.tan(self.pitch) + 0.44/math.cos(self.pitch)

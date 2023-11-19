@@ -8,7 +8,7 @@ import os
 import pybullet as p
 import pybullet_data
 from resources.laikago_modulating_v1 import LaikagoCPG as Laikago
-from resources.ramp import Ramp
+from resources.ramp import Ramp, Bridge
 from VAE.modules import VAE
 
 class modulatingEnv(gym.Env):
@@ -65,6 +65,7 @@ class modulatingEnv(gym.Env):
         )
         self.encoder.load_state_dict(torch.load(os.path.join(vae_path, "best_model.pt")))
         self.encoder.eval()
+        self.bridge = True
 
     def step(self, action):
         # give action to agent
@@ -80,10 +81,18 @@ class modulatingEnv(gym.Env):
     def reset(self):
         p.resetSimulation(self.client)
         p.setGravity(0,0,-9.8)
-        self.ramp = Ramp(client=self.client)
-        p.loadURDF("plane.urdf", basePosition=[0,0,self.ramp._lowest])
-        self.quadruped = Laikago(client=self.client, gamma=self.gamma)
-        self.quadruped.spawn()
+        if self.bridge:
+            # load bridge urdf
+            self.ramp = Bridge(client=self.client)
+            pitch, z = self.ramp.get_status()
+            self.quadruped = Laikago(client=self.client, gamma=self.gamma)
+            self.quadruped.spawn(pitch=pitch, z=z)
+            p.loadURDF("plane.urdf", basePosition=[0,0,0])
+        else:    
+            self.ramp = Ramp(client=self.client)
+            p.loadURDF("plane.urdf", basePosition=[0,0,self.ramp._lowest])
+            self.quadruped = Laikago(client=self.client, gamma=self.gamma)
+            self.quadruped.spawn()
         self.quadruped.CPG.freq_range = self.freq_range
         # Define initial motor positions (radians)
         initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]

@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <robot name="bridge">
     <!-- Colors-->
-    <material name="blue">
-        <color rgba="0 0 0.8 1"/>
+    <material name="grey">
+        <color rgba="0.5, 0.5, 0.5, 0.8"/>
     </material>
 
     <!-- Bridge-->
     <link name="base_link">
         <visual> 
             <geometry> 
-                <box size="1 10 0.01"/>
+                <box size="2 20 0.01"/>
                 <origin rpy="0 1 0" xyz="-1 -1 -0.005"/>
             </geometry>
-            <material name="blue"/>
+            <material name="grey"/>
         </visual>
         <collision> 
              <geometry> 
-                <box size="1 10 0.01"/>
+                <box size="2 20 0.01"/>
                 <origin rpy="0 1 0" xyz="-1 -1 -0.005"/>
             </geometry>           
         </collision> 

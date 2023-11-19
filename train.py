@@ -14,13 +14,13 @@ if __name__ == "__main__":
 
     # create log directory
 
-    log_dir = "tmp/modulating_v2/new_net_10e7ts"
+    log_dir = "tmp/modulating_v1_bridge/bigger_updates"
     os.makedirs(log_dir, exist_ok=True) 
 
     # create quadruped environment
     freq_range = [1.5, 5]
     gamma = 10.0
-    environment = 'modulatingEnv-v2'
+    environment = 'modulatingEnv-v1'
     use_vae = True
     vae = 'lr5e-3_bs16_kld0.00025'
     vae_path = os.path.join("VAE/tmp_eval", vae)
@@ -33,12 +33,12 @@ if __name__ == "__main__":
         env.envs[i] = Monitor(env.envs[i], log_dir)
 
     # create PPO model
-    n_steps = 4096*4
-    batch_size = 512*4
-    lr = 0.0002
+    n_steps = 4096*16
+    batch_size = 512*16
+    lr = 0.0003
     tot_timesteps = 10000000
     activation = nn.Tanh
-    custom_arch = dict(pi=[256, 128], vf=[256, 128])
+    custom_arch = dict(pi=[200, 100], vf=[200, 100])
     model = PPO("MlpPolicy", env, verbose=1, device="cuda", learning_rate=lr ,n_steps=n_steps, batch_size=batch_size,
                 policy_kwargs=dict(activation_fn=activation,net_arch=custom_arch), tensorboard_log=log_dir)
 
