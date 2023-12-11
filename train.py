@@ -14,11 +14,11 @@ if __name__ == "__main__":
 
     # create log directory
 
-    log_dir = "tmp/modulating_v1_bridge/bigger_updates"
+    log_dir = "tmp/modulating_v1/even_bigger_updates_max4freq_biggernet_tr2"
     os.makedirs(log_dir, exist_ok=True) 
 
     # create quadruped environment
-    freq_range = [1.5, 5]
+    freq_range = [1.5, 4]
     gamma = 10.0
     environment = 'modulatingEnv-v1'
     use_vae = True
@@ -35,10 +35,10 @@ if __name__ == "__main__":
     # create PPO model
     n_steps = 4096*16
     batch_size = 512*16
-    lr = 0.0003
+    lr = 0.0002
     tot_timesteps = 10000000
     activation = nn.Tanh
-    custom_arch = dict(pi=[200, 100], vf=[200, 100])
+    custom_arch = dict(pi=[256, 128], vf=[256, 128])
     model = PPO("MlpPolicy", env, verbose=1, device="cuda", learning_rate=lr ,n_steps=n_steps, batch_size=batch_size,
                 policy_kwargs=dict(activation_fn=activation,net_arch=custom_arch), tensorboard_log=log_dir)
 

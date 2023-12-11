@@ -65,7 +65,7 @@ class modulatingEnv(gym.Env):
         )
         self.encoder.load_state_dict(torch.load(os.path.join(vae_path, "best_model.pt")))
         self.encoder.eval()
-        self.bridge = True
+        self.bridge = False
 
     def step(self, action):
         # give action to agent

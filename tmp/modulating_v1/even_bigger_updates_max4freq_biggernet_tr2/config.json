@@ -1,0 +1,25 @@
+{
+    "env": "modulatingEnv-v1",
+    "vae_path": "VAE/tmp_eval/lr5e-3_bs16_kld0.00025",
+    "lr": 0.0002,
+    "n_steps": 65536,
+    "batch_size": 8192,
+    "net_arch": {
+        "pi": [
+            256,
+            128
+        ],
+        "vf": [
+            256,
+            128
+        ]
+    },
+    "activation_fn": "<class 'torch.nn.modules.activation.Tanh'>",
+    "total_timesteps": 10000000,
+    "freq_range": [
+        1.5,
+        4
+    ],
+    "gamma": 10.0,
+    "use_vae": true
+}

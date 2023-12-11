@@ -8,7 +8,7 @@ class Ramp:
         self._L = 2
         self._fname = os.path.join(os.path.dirname(__file__), f'urdf/ramp_{self._L}.urdf')
         self._client = client
-        self.path_leght = 5
+        self.path_leght = 10
         # Lenght of segments
         self._ycord = self._L-1
         self._height = 0.0
@@ -66,7 +66,7 @@ class Bridge:
         self._fname = os.path.join(os.path.dirname(__file__), 'urdf/bridge.urdf')
         self._client = client
         if pitch is None:
-            self.pitch = random.uniform(0, math.pi/18) # uniform between 0 and 10 degrees
+            self.pitch = random.uniform(0, 5*math.pi/180) # uniform between 0 and 10 degrees
         else:
             self.pitch = pitch
         self.x_start = 4 - 5*math.sqrt(1-math.tan(self.pitch)**2)
