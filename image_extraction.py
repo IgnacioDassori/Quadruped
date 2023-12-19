@@ -142,7 +142,7 @@ def interactive_camera_placement(pos_scale=10.,
         '''
         img = pb.getCameraImage(width, height, view_mtx, proj_mtx)[2]
         colored = cv2.resize(img, (display_width, display_height))
-        cv2.imshow('depth', colored)
+        cv2.imshow('image', colored)
         key = cv2.waitKey(10) & 0xFF
         if key == ord('q'):
             break

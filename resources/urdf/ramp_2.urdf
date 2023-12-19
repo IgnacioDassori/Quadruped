@@ -2,7 +2,7 @@
 <robot name="ramp">
     <!-- Colors-->
     <material name="grey">
-        <color rgba="0.5, 0.5, 0.5, 0.8"/>
+        <color rgba="0.5, 0.5, 0.5, 1.0"/>
     </material>
 
     <!-- Ramp-->

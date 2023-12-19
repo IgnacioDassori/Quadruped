@@ -11,7 +11,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 if __name__ == "__main__":
 
-    version = "modulating_v1_bridge/bigger_updates"
+    version = "modulating/walk_straight"
     # load config from json
     with open(f"tmp/{version}/config.json") as f:
         config = json.load(f)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     for i in range(20000):
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
-        time.sleep(0.002)
+        #time.sleep(0.002)
         pos = vec_env.envs[0].quadruped.pos
         poses.append(pos)
         R.append(rewards[0])

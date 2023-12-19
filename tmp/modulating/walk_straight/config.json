@@ -20,5 +20,6 @@
         1.5,
         5
     ],
-    "gamma": 10.0
+    "gamma": 10.0,
+    "use_vae": false
 }

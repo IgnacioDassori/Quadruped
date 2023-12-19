@@ -8,22 +8,42 @@ from resources.ramp import Ramp, Bridge
 client = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
-bridge = Bridge(client=client)
-pitch, z = bridge.get_status()
+bridge = Ramp(client=client)
 
 p.setGravity(0,0,-9.8)
 p.setTimeStep(1./500)
 #p.setDefaultContactERP(0)
 #urdfFlags = p.URDF_USE_SELF_COLLISION+p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS 
 urdfFlags = p.URDF_USE_SELF_COLLISION
-quat = p.getQuaternionFromEuler([math.pi/2-pitch,0,math.pi])
+quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi])
 
 quadruped = p.loadURDF("laikago/laikago_toes.urdf",
-							[0,0,z],
+							[0,0,0.45],
 							quat, 
 							flags = urdfFlags,
 							useFixedBase=False,
 							physicsClientId=client) 
+
+
+visualShapeId = p.createVisualShape(
+    shapeType=p.GEOM_MESH,
+    fileName="resources/objects/cone.obj",
+    meshScale=[0.2, 0.2, 0.2],  # Adjust the scale if necessary
+)
+
+collisionShapeId = p.createCollisionShape(
+    shapeType=p.GEOM_MESH,
+    fileName="resources/objects/cone.obj",
+    meshScale=[0.2, 0.2, 0.2],  # Adjust the scale if necessary
+)
+
+bodyUniqueId = p.createMultiBody(
+    baseCollisionShapeIndex=collisionShapeId,
+    baseVisualShapeIndex=visualShapeId,
+    basePosition=[1, 0, -0.5],  # Adjust the position if necessary
+	baseOrientation=quat
+)
+
 
 jointIds=[1, 2, 5, 6, 9, 10, 13, 14]
 initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]

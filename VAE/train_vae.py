@@ -1,6 +1,7 @@
 import torch
 import json
 import os
+import numpy as np
 from PIL import Image
 from modules import VAE, DepthDataset, RGBDataset
 from torchvision import transforms
@@ -11,7 +12,7 @@ sys.path.append('..')
 
 if __name__ == "__main__":
 
-    log_dir = "VAE/tmp_eval/lr5e-3_bs16_kld0.00025_sigm"
+    log_dir = "VAE/tmp_eval/repeat_best"
     mode = "training"
     os.makedirs(log_dir, exist_ok=True) 
 
@@ -19,9 +20,9 @@ if __name__ == "__main__":
     in_channels = 3
     latent_dim = 16
     layers = [32, 64, 128, 256, 512]
-    lr = 5e-4
-    kld_weight = 0.00025
+    lr = 1e-3
     batch_size = 16
+    kld_weight = 0.00025
     activation = "LeakyReLU"
     batch_norm = "BatchNorm2d"
     output_activation = "Tanh"
@@ -123,7 +124,8 @@ if __name__ == "__main__":
         with open(os.path.join(log_dir, 'config.json'), 'w') as f:
             f.write(json_object)
 
-
+        np.save(os.path.join(log_dir, 'train_loss.npy'), loss_list)
+        np.save(os.path.join(log_dir, 'eval_loss.npy'), eval_loss_list)
 
     # TEST MODEL
 
@@ -134,7 +136,8 @@ if __name__ == "__main__":
             test_img = batch_images[n]
             #test_img = (test_img - test_img.min()) / (test_img.max() - test_img.min())
             input = test_img.float().unsqueeze(0).to(device)
-            recon_img, _, _ = model(input)
+            mu, logvar = model.encode(input)
+            recon_img = model.decode(mu)
             recon_img = recon_img.squeeze().detach()
             # plot input and output
             fig, axes = plt.subplots(1, 2)

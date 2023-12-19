@@ -8,7 +8,7 @@ class Ramp:
         self._L = 2
         self._fname = os.path.join(os.path.dirname(__file__), f'urdf/ramp_{self._L}.urdf')
         self._client = client
-        self.path_leght = 5
+        self.path_leght = 10
         # Lenght of segments
         self._ycord = self._L-1
         self._height = 0.0
