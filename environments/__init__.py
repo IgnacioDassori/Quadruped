@@ -1,49 +1,37 @@
 from gym.envs.registration import register
 
 register(
-    id='plainCPGEnv-v0',
-    entry_point='environments.plainCPG:plainCPGEnv',
-    kwargs={'mode': 0, 'freq_range': [3.0, 8.0], 'gamma': 5.0}
+    id='ppo_plainEnv',
+    entry_point='environments.ppo_plain:plainEnv',
+    kwargs={'mode': 0, 'freq_range': None, 'gamma': None}
 )
 
 register(
-    id='bridgeEnv-v0',
-    entry_point='environments.bridgeCPG:oneSlopeEnv',
+    id='ppo_slopeEnv',
+    entry_point='environments.ppo_slope:slopeEnv',
+    kwargs={'mode': 0, 'freq_range': None, 'gamma': None, 'vae_path': 'lr5e-3_bs16_kld0.00025'}
+)
+
+register(
+    id='cpg_plainEnv',
+    entry_point='environments.cpg_plain:plainCPGEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
 )
 
 register(
-    id='plainCPGEnv-v1',
-    entry_point='environments.plainCPG_v1:plainCPGEnv',
-    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
-)
-
-register(
-    id='fullEnv-v0',
-    entry_point='environments.fullEnvironment:fullEnv',
+    id='cpg_slopeEnv',
+    entry_point='environments.cpg_slope:slopeCPGEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}    
 )
 
 register(
-    id='plainCPGEnv-v2',
-    entry_point='environments.plainCPG_v2:plainCPGEnv',
+    id='modulating_plainEnv',
+    entry_point='environments.modulating_plain:modulatingEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
 )
 
 register(
-    id='modulatingEnv-v0',
-    entry_point='environments.modulating:modulatingEnv',
-    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0}
-)
-
-register(
-    id='modulatingEnv-v1',
-    entry_point='environments.modulating_v1:modulatingEnv',
-    kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}
-)
-
-register(
-    id='modulatingEnv-v2',
-    entry_point='environments.modulating_v2:modulatingEnv',
+    id='modulating_slopeEnv',
+    entry_point='environments.modulating_slope:modulatingEnv',
     kwargs={'mode': 0, 'freq_range': [1.5, 5.0], 'gamma': 10.0, 'vae_path': 'lr5e-3_bs16_kld0.00025'}
 )

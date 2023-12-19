@@ -1,8 +1,7 @@
 import torch
 import json
 import os
-from PIL import Image
-from modules import VAE, DepthDataset, RGBDataset
+from modules import VAE, RGBDataset
 from torchvision import transforms
 import matplotlib.pyplot as plt
 import glob
@@ -11,7 +10,7 @@ sys.path.append('..')
 
 if __name__ == "__main__":
 
-    log_dir = "VAE/tmp_eval/lr5e-3_bs16_kld0.00025_sigm"
+    log_dir = "results/lr5e-3_bs16_kld0.00025_sigm"
     mode = "training"
     os.makedirs(log_dir, exist_ok=True) 
 
@@ -38,9 +37,7 @@ if __name__ == "__main__":
     transform = transforms.Compose([
         transforms.RandomVerticalFlip(),
         transforms.RandomHorizontalFlip(),
-        #transforms.RandomRotation(90),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     dataset = RGBDataset(img_path, transform)
@@ -68,7 +65,6 @@ if __name__ == "__main__":
 
             for batch_images in train_loader:
                 batch_images = batch_images.float().to(device)
-                #batch_images = (batch_images - batch_images.min()) / (batch_images.max() - batch_images.min())
                 recon_images, mu, logvar = model(batch_images)
                 loss = model.loss_function(recon_images, batch_images, mu, logvar)
                 epoch_loss += loss.item()
@@ -79,7 +75,6 @@ if __name__ == "__main__":
             loss_list.append(epoch_loss)
 
             # evaluate the model
-
             model.eval()
             eval_epoch_loss = 0
 
@@ -132,11 +127,8 @@ if __name__ == "__main__":
     for batch_images in val_loader:
         for n in range(len(batch_images)):
             test_img = batch_images[n]
-            #test_img = (test_img - test_img.min()) / (test_img.max() - test_img.min())
             input = test_img.float().unsqueeze(0).to(device)
             recon_img, _, _ = model(input)
-            recon_img = recon_img.squeeze().detach()
-            # plot input and output
             fig, axes = plt.subplots(1, 2)
             axes[0].imshow(transforms.ToPILImage()(test_img))
             axes[1].imshow(transforms.ToPILImage()(recon_img))

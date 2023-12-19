@@ -2,8 +2,8 @@ import json
 import os
 import numpy as np
 
-# list of all subdirectories in tmp_eval folder
-subdirs = [x[0] for x in os.walk('tmp_eval/')][1:]
+# list of all subdirectories in results folder
+subdirs = [x[0] for x in os.walk('results/')][1:]
 loss_list = []
 
 for subdir in subdirs:

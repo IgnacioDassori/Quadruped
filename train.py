@@ -3,27 +3,29 @@ import gym
 import json
 import torch.nn as nn
 from stable_baselines3 import PPO
-from environments.plainCPG import plainCPGEnv
+from environments.modulating_slope import modulatingEnv
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-from resources.callbacks import SaveOnBestTrainingRewardCallback, SaveBestModelCallback
+from utils.callbacks import SaveBestModelCallback
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import BaseCallback
         
 
 if __name__ == "__main__":
 
     # create log directory
 
-    log_dir = "tmp/modulating_v1/even_bigger_updates_max4freq_biggernet_tr2"
+    environment = 'modulating_plainEnv'
+    experiment_name = 'new_reward_max3freq'
+    use_vae = False
+    if 'slope' in environment:
+        use_vae = True
+    log_dir = f"results_new_rew/{environment}/{experiment_name}"
     os.makedirs(log_dir, exist_ok=True) 
 
     # create quadruped environment
-    freq_range = [1.5, 4]
+    freq_range = [1.0, 3.0]
     gamma = 10.0
-    environment = 'modulatingEnv-v1'
-    use_vae = True
     vae = 'lr5e-3_bs16_kld0.00025'
-    vae_path = os.path.join("VAE/tmp_eval", vae)
+    vae_path = os.path.join("VAE/results", vae)
     if use_vae:
         env = DummyVecEnv([lambda: gym.make(environment, mode=0, freq_range=freq_range, gamma=gamma, vae_path=vae_path)])
     else:

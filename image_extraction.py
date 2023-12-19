@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import cv2
 import pybullet as pb
 import pybullet_data
-from resources.ramp import Ramp
+from resources.utils.ramp import Ramp
 import datetime
 import torch
 
