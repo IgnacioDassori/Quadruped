@@ -37,11 +37,12 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         return True
     
 class SaveBestModelCallback(CheckpointCallback):
-    def __init__(self, check_freq, save_path, name_prefix, verbose=1):
+    def __init__(self, check_freq, save_path, name_prefix, vec_env, verbose=1):
         super().__init__(save_freq=check_freq, save_path=save_path, name_prefix=name_prefix, verbose=verbose)
         self.best_mean_reward = -np.inf  # Initialize with negative infinity
         self.save_path = save_path
         self.check_freq = check_freq
+        self.vec_env = vec_env
 
     def _on_step(self) -> bool:
         if self.num_timesteps > 0 and self.num_timesteps % self.check_freq == 0:
@@ -51,8 +52,12 @@ class SaveBestModelCallback(CheckpointCallback):
             print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(self.best_mean_reward, mean_reward))
             if mean_reward > self.best_mean_reward:
                 self.best_mean_reward = mean_reward
+                # Save the model
                 file_path = os.path.join(self.save_path, f"{self.name_prefix}.zip")
                 print("Saving new best model to {}".format(file_path))
                 self.model.save(file_path)
+                # Save the VecNormalize statistics
+                stats_path = os.path.join(self.save_path, "vec_normalize.pkl")
+                print(f"Saving VecNormalize to {stats_path}")
+                self.vec_env.save(stats_path)
         return True
-

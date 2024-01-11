@@ -63,13 +63,8 @@ if __name__ == "__main__":
         f.write(json_object)
 
     # create callback
-    #callback = SaveOnBestTrainingRewardCallback(check_freq=n_steps, log_dir=log_dir)
-    callback = SaveBestModelCallback(check_freq=n_steps, save_path=log_dir, name_prefix="best_model", verbose=1)
+    callback = SaveBestModelCallback(check_freq=n_steps, save_path=log_dir, name_prefix="best_model", vec_env=env ,verbose=1)
 
     # train model
     model.learn(total_timesteps=tot_timesteps, callback=callback)
-
-    # save model
-    stats_path = os.path.join(log_dir, "vec_normalize.pkl")
-    env.save(stats_path)
     env.close()
