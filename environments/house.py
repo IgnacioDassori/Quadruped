@@ -3,6 +3,7 @@ import numpy as np
 import math
 import pybullet as p
 import pybullet_data
+from utils.spawn_objects import SpawnManager
 from agents.laikago_mod_plain import LaikagoCPG as Laikago
 
 class houseEnv(gym.Env):
@@ -59,7 +60,7 @@ class houseEnv(gym.Env):
     def reset(self):
         p.resetSimulation(self.client)
         p.setGravity(0,0,-9.8)
-        p.loadURDF("plane.urdf", basePosition=[0,0,0])
+        spawner = SpawnManager()
         self.quadruped = Laikago(client=self.client, gamma=self.gamma)
         self.quadruped.spawn()
         self.quadruped.CPG.freq_range = self.freq_range

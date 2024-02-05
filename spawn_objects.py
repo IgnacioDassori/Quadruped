@@ -99,8 +99,8 @@ class SpawnManager:
         radius = 1
         goalVisualShape = p.createVisualShape(p.GEOM_SPHERE, radius=radius, rgbaColor=[1, 0, 0, 1])
 
-        for i in range(0, 2):
-            for j in range(self.goal-1, self.goal+2):
+        for i in range(0, 3):
+            for j in range(self.goal-2, self.goal+3):
                 self.grid[i,j] = 1
 
         p.createMultiBody(baseMass=0, baseVisualShapeIndex=goalVisualShape, basePosition=pos)
