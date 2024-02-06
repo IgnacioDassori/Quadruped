@@ -7,13 +7,11 @@ class SpawnManager:
     def __init__(self, grid_size=10, spawn_objects=True):
         # Grid that represents the house
         self.grid = np.zeros((grid_size,grid_size))
-        self.max_obj = 5
+        self.max_obj = 7
         self.objs = 0
         self.goal = random.randint(2, 7)
-        # Robot always spawns in cells (9,4) & (9,5)
-        for i in range(8, 10):
-            for j in range(3, 7):
-                self.grid[i,j] = 1
+        # Determine robot spawn and fill cells
+        self.pos, self.angle = self.robot_spawn()
         # Spawn the goal which occupies one cell on the opposite side
         self.spawn_house()
         self.spawn_goal()     
@@ -24,6 +22,11 @@ class SpawnManager:
 
 
     def main_loop(self):
+        # Dont spawn near walls
+        for x in [0,9]:
+            for y in range(10):
+                self.grid[x,y] = 1
+                self.grid[y,x] = 1
         # Look for spots to spawn objects    
         while self.objs < self.max_obj and self.valid_types != []:
             # Randomly select object type / 
@@ -38,6 +41,41 @@ class SpawnManager:
                 continue
             self.spawn_object(obj_type, pos, roll)
 
+    def robot_spawn(self):
+
+        # 1/3 chance of spawning bottom, left, right
+        choice = random.uniform(0, 1)
+        random_pos = random.uniform(-4.5, 4.5)
+        choice = 0.1
+        if choice < 1/3:
+            x_pos = random_pos
+            y_pos = -4.5
+            m = round(x_pos + 4.5)
+            for i in range(8, 10):
+                for j in range(m-1, m+2):
+                    if j < 0 or j > 9:
+                        continue
+                    self.grid[i,j] = 1
+        elif choice < 2/3:
+            x_pos = -4.5
+            y_pos = random_pos
+            n = round(y_pos + 4.5)
+            for i in range(n-1, n+2):
+                for j in range(0, 2):
+                    if i < 0 or i > 9:
+                        continue
+                    self.grid[i,j] = 1
+        else:
+            x_pos = 4.5
+            y_pos = random_pos
+            n = round(y_pos + 4.5)
+            for i in range(n-1, n+2):
+                for j in range(8, 10):
+                    if i < 0 or i > 9:
+                        continue
+                    self.grid[i,j] = 1
+        angle = - math.atan2(-x_pos, -y_pos) + random.uniform(-math.pi/4, math.pi/4)
+        return [x_pos, y_pos], angle
 
     def find_spots(self, obj_type):
 
@@ -84,7 +122,7 @@ class SpawnManager:
 
     def spawn_house(self):
 
-        file = 'objects/house.obj'
+        file = 'utils/objects/house.obj'
 
         houseCollisionShape = p.createCollisionShape(p.GEOM_MESH,
                                                     fileName=file)
@@ -99,10 +137,10 @@ class SpawnManager:
     
     def spawn_goal(self):
 
-        pos = [-4.5 + self.goal, 4.5, 0]
+        pos = [-4.5 + self.goal, 4.5, 1]
 
         radius = 1
-        goalVisualShape = p.createVisualShape(p.GEOM_SPHERE, radius=radius, rgbaColor=[1, 0, 0, 1])
+        goalVisualShape = p.createVisualShape(p.GEOM_BOX, halfExtents=[0.5, 0.5, 1], rgbaColor=[1, 0, 0, 1])
 
         for i in range(0, 3):
             for j in range(self.goal-2, self.goal+3):
@@ -114,17 +152,17 @@ class SpawnManager:
 
         quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi+roll])
 
-        obj_dict = {0: 'cone',
-                    1: 'barricade',
-                    2: 'cement',
-                    3: 'ladder',
+        obj_dict = {0: 'cone2',
+                    1: 'barricade2',
+                    2: 'cement2',
+                    3: 'ladder2',
                     4: 'pallet'}
         
         self.objs += 1
         
         obj_name = obj_dict[obj_type]
 
-        file = f'objects/{obj_name}.obj'
+        file = f'utils/objects/{obj_name}.obj'
 
         objCollisionShape = p.createCollisionShape(p.GEOM_MESH,
                                                     fileName=file)

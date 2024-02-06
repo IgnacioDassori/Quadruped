@@ -2,6 +2,7 @@ import pybullet as p
 import pybullet_data
 import numpy as np
 import math
+from PIL import Image
 from utils.cpg import CPG
 
 class LaikagoHouse:
@@ -57,6 +58,7 @@ class LaikagoHouse:
             )
 
     def get_observation(self):
+        self.get_image()
         self.pos, ori = p.getBasePositionAndOrientation(self.laikago)
         self.ori = p.getEulerFromQuaternion(ori)
         self.vel = p.getBaseVelocity(self.laikago)
@@ -73,6 +75,31 @@ class LaikagoHouse:
                       self.CPG._off_k
                       ]
         return np.array(list(self.ori[0:2])+list(self.vel[1][0:2])+self.motor_positions+cpg_params)
+    
+    def get_image(self):
+        # position and orientation of the agent
+        agent_pos, agent_orn = p.getBasePositionAndOrientation(self.laikago)
+        euler = p.getEulerFromQuaternion(agent_orn)
+        roll, pitch, yaw = euler
+        # rotation matrices
+        roll_rot = np.array(([1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]))
+        pitch_rot = np.array(([math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]))
+        yaw_rot = np.array(([math.cos(yaw), -math.sin(yaw), 0], [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1]))
+        unit_vec = np.array([0, 0, 1])
+        camera_up = np.array([0, 1, 0])
+        camera_dist = 0.2
+        camera_targ = 10000
+        rotated = np.matmul(np.matmul(np.matmul(yaw_rot, pitch_rot), roll_rot), unit_vec)
+        rotated_point = camera_dist*rotated + agent_pos
+        rotated_view = camera_targ*rotated + agent_pos
+        rotated_up = np.matmul(np.matmul(np.matmul(yaw_rot, pitch_rot), roll_rot), camera_up)
+        # camera view matrix
+        view_matrix = p.computeViewMatrix(rotated_point, rotated_view, rotated_up)
+        # camera projection matrix
+        projection_matrix = p.computeProjectionMatrixFOV(fov=90, aspect=1.0, nearVal=0.1, farVal=30.0)
+        # get camera image
+        image = p.getCameraImage(width=128, height=128, viewMatrix=view_matrix, projectionMatrix=projection_matrix)[2]    
+        return Image.fromarray(image).convert('RGB')
     
     def calculate_reward(self, done, timestep):
 

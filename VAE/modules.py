@@ -110,6 +110,89 @@ class VAE(nn.Module):
         KLD = torch.mean(-0.5 * torch.sum(1 + logvar - mu ** 2 - logvar.exp(), dim = 1), dim = 0)
         return REL + KLD*self.kld_weight
     
+
+class VAE_512(nn.Module):
+    def __init__(self, in_channels=3, latent_dim=16, lr=5e-3, kld_weight=0.00025, hidden_dims=[32, 64, 128, 256, 512]):
+        super(VAE_512, self).__init__()
+
+        self.latent_dim = latent_dim
+        self.lr = lr
+        self.kld_weight = kld_weight
+
+
+        # Build Encoder
+        modules = []
+        for h_dim in hidden_dims:
+            modules.append(
+                nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels=h_dim,
+                              kernel_size= 4, stride = 2, padding  = 1),
+                    nn.BatchNorm2d(h_dim),
+                    nn.LeakyReLU())
+            )
+            in_channels = h_dim
+
+        self.encoder = nn.Sequential(*modules)
+        reduced_size = int(512 / (2 ** len(hidden_dims)))
+        self.reduced_size = reduced_size
+        self.fc_mu = nn.Linear(hidden_dims[-1] * reduced_size * reduced_size, latent_dim)
+        self.fc_logvar = nn.Linear(hidden_dims[-1] * reduced_size * reduced_size, latent_dim)
+
+        # Build Decoder
+        modules = []
+        self.fc_decoder = nn.Linear(latent_dim, hidden_dims[-1] * reduced_size * reduced_size)
+        hidden_dims.reverse()
+        for i in range(len(hidden_dims) - 1):
+            modules.append(
+                nn.Sequential(
+                    nn.ConvTranspose2d(hidden_dims[i],
+                                       hidden_dims[i + 1],
+                                       kernel_size=4,
+                                       stride = 2,
+                                       padding=1),
+                    nn.BatchNorm2d(hidden_dims[i + 1]),
+                    nn.LeakyReLU())
+            )
+        modules.append(
+            nn.Sequential(
+                nn.ConvTranspose2d(hidden_dims[-1], out_channels= in_channels,
+                                   kernel_size= 4, stride= 2, padding= 1),
+                nn.Tanh()
+            )
+        )
+        self.decoder = nn.Sequential(*modules)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)  
+        self.hidden_dims = hidden_dims
+    
+    def encode(self, x):
+        x = self.encoder(x)
+        x = torch.flatten(x, 1)
+        mu = self.fc_mu(x)
+        logvar = self.fc_logvar(x)
+        return mu, logvar
+    
+    def decode(self, z):
+        z = self.fc_decoder(z)
+        z = z.view(-1, self.hidden_dims[0], self.reduced_size, self.reduced_size)
+        return self.decoder(z)
+    
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + std * eps
+    
+    def forward(self, x):
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        return self.decode(z), mu, logvar
+    
+    def loss_function(self, recon_x, x, mu, logvar):
+        REL = F.mse_loss(recon_x, x, reduction="sum")
+        #KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        KLD = torch.mean(-0.5 * torch.sum(1 + logvar - mu ** 2 - logvar.exp(), dim = 1), dim = 0)
+        return REL + KLD*self.kld_weight
+
+
 class DeepAutoencoder(nn.Module):
     def __init__(self, in_channels=1, latent_dim=32):
         super(DeepAutoencoder, self).__init__()
@@ -207,6 +290,21 @@ class RGBDataset(Dataset):
     def __getitem__(self, idx):
         img_name = self.image_path[idx]
         image = Image.open(img_name).resize((128, 128)).convert('RGB')
+        if self.transform:
+            tensor = self.transform(image)
+        return tensor
+    
+class HouseDataset(Dataset):
+    def __init__(self, image_path, transform=None):
+        self.image_path = image_path
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_path)
+    
+    def __getitem__(self, idx):
+        img_name = self.image_path[idx]
+        image = Image.open(img_name).convert('RGB')
         if self.transform:
             tensor = self.transform(image)
         return tensor

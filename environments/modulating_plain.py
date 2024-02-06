@@ -3,6 +3,7 @@ import numpy as np
 import math
 import pybullet as p
 import pybullet_data
+from utils.spawn_objects import SpawnManager
 from agents.laikago_mod_plain import LaikagoCPG as Laikago
 
 class modulatingEnv(gym.Env):
@@ -44,6 +45,8 @@ class modulatingEnv(gym.Env):
         # CPG proportional controler gain
         self.gamma = gamma
         self.freq_range = freq_range
+        # Type of environment
+        self.house = True
 
     def step(self, action):
         # give action to agent
@@ -59,9 +62,16 @@ class modulatingEnv(gym.Env):
     def reset(self):
         p.resetSimulation(self.client)
         p.setGravity(0,0,-9.8)
-        p.loadURDF("plane.urdf", basePosition=[0,0,0])
         self.quadruped = Laikago(client=self.client, gamma=self.gamma)
-        self.quadruped.spawn()
+        if self.house:
+            sm = SpawnManager(spawn_objects=False)
+            start_pos = [sm.pos[0], sm.pos[1], 0.44]
+            yaw = sm.angle
+        else:
+            p.loadURDF("plane.urdf", basePosition=[0,0,0])
+            start_pos = [0, 0, 0.44]
+            yaw = 0
+        self.quadruped.spawn(yaw=yaw, start_pos=start_pos)
         self.quadruped.CPG.freq_range = self.freq_range
         # Define initial motor positions (radians)
         initial_motor_positions = [0, -0.7, 0, -0.7, 0, -0.7, 0, -0.7]

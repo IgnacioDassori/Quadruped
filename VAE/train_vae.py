@@ -1,22 +1,23 @@
 import torch
 import json
 import os
-from modules import VAE, RGBDataset
+from modules import VAE, VAE_512, RGBDataset, HouseDataset
 from torchvision import transforms
 import matplotlib.pyplot as plt
 import glob
 import sys
+import tqdm
 sys.path.append('..')
 
 if __name__ == "__main__":
 
-    log_dir = "results/lr5e-3_bs16_kld0.00025_sigm"
+    log_dir = "VAE/results_house"
     mode = "training"
     os.makedirs(log_dir, exist_ok=True) 
 
     # hyperparameters
     in_channels = 3
-    latent_dim = 16
+    latent_dim = 32
     layers = [32, 64, 128, 256, 512]
     lr = 5e-4
     kld_weight = 0.00025
@@ -24,24 +25,28 @@ if __name__ == "__main__":
     activation = "LeakyReLU"
     batch_norm = "BatchNorm2d"
     output_activation = "Tanh"
-    tf = ["RandomVerticalFlip", "RandomHorizontalFlip"]
+    tf = ["RandomHorizontalFlip"]
 
     # create model
-    model = VAE(in_channels=in_channels, latent_dim=latent_dim)
+    model = VAE_512(in_channels=in_channels, 
+                    latent_dim=latent_dim, 
+                    lr=lr,
+                    kld_weight=kld_weight,
+                    hidden_dims=layers)
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     # load the dataset
-    img_path = glob.glob("images/images_rgb/*.png")
+    img_path = glob.glob("images/house_rgb_512/*.jpg")
 
     transform = transforms.Compose([
-        transforms.RandomVerticalFlip(),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
     ])
 
-    dataset = RGBDataset(img_path, transform)
-    train_len = 448
+    dataset = HouseDataset(img_path, transform)
+    train_len = 2048
     val_len = len(dataset) - train_len
     train_set, val_set = torch.utils.data.random_split(dataset, [train_len, val_len])
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
@@ -55,6 +60,7 @@ if __name__ == "__main__":
         lowest_loss = 1e10
         loss_list = []
         eval_loss_list = []
+        since_last_best = 0
 
         for epoch in range(num_epochs):
 
@@ -88,10 +94,16 @@ if __name__ == "__main__":
 
             print(f"Epoch {epoch+1} train loss: {epoch_loss:.4f}, eval loss: {eval_epoch_loss:.4f}")
             # if best model so far, save it
+            since_last_best += 1
             if eval_epoch_loss < lowest_loss:
+                since_last_best = 0
                 lowest_loss = eval_epoch_loss
                 torch.save(model.state_dict(), log_dir + "/best_model.pt")
                 print(f"New best model saved with loss: {lowest_loss:.4f}")
+
+            if since_last_best > 20:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
 
         # plot the loss
         plt.plot(loss_list, label="train loss")
@@ -130,6 +142,7 @@ if __name__ == "__main__":
             input = test_img.float().unsqueeze(0).to(device)
             recon_img, _, _ = model(input)
             fig, axes = plt.subplots(1, 2)
+            recon_img = recon_img.squeeze()
             axes[0].imshow(transforms.ToPILImage()(test_img))
             axes[1].imshow(transforms.ToPILImage()(recon_img))
             plt.show()

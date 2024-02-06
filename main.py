@@ -19,6 +19,7 @@ if __name__ == "__main__":
         config = json.load(f)
 
     # plot the results
+    '''
     df = pd.read_csv(f"results/{version}/monitor.csv", skiprows=1)
     rolling_mean_rewards = df['r'].rolling(window=10).mean()
     episode_numbers = np.arange(1, len(rolling_mean_rewards) + 1)
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     axes[1].set_xlabel('Episode')
     axes[1].set_ylabel('Rolling mean reward')
     plt.show()
+    '''
 
     # load trained vector environment
     gym_env = config['env']

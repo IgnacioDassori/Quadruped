@@ -30,10 +30,10 @@ class LaikagoCPG:
         self.goal = 10.0
         self.modulation_range = [-0.1, 0.1]
 
-    def spawn(self, pitch=0, z=0.44):
-        quat = p.getQuaternionFromEuler([math.pi/2-pitch,0,math.pi])
+    def spawn(self, yaw=0, start_pos=[0,0,0.44]):
+        quat = p.getQuaternionFromEuler([math.pi/2,0,math.pi+yaw])
         self.laikago = p.loadURDF("laikago/laikago_toes.urdf",
-                                  [0,0,z],
+                                  start_pos,
                                   quat, 
                                   flags = p.URDF_USE_SELF_COLLISION,
                                   useFixedBase=False,
@@ -99,6 +99,7 @@ class LaikagoCPG:
         # robot falls
         if abs(self.ori[1]) > 0.5 or abs(self.ori[0]-math.pi/2) > 0.5:
             return True
+        '''
         if (self.pos[1]-self.start)<-0.5:
             return True
         # robot reaches goal
@@ -108,7 +109,10 @@ class LaikagoCPG:
         # test condition: Robot moves to the side too much
         if abs(self.pos[0]) > 0.5:
             return True
-
+        '''
+        # ONLY FOR IMAGE EXTRACTION!
+        if self.pos[1] > 3.5:
+            return True
         # maximum episode length
         if timestep >= self.max_episode_length:
             return True

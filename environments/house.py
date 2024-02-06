@@ -1,16 +1,20 @@
 import gym 
 import numpy as np
 import math
+import os
+import json
+import torch
 import pybullet as p
 import pybullet_data
+from VAE.modules import VAE
 from utils.spawn_objects import SpawnManager
-from agents.laikago_mod_plain import LaikagoCPG as Laikago
+from agents.laikago_house import LaikagoHouse as Laikago
 
 class houseEnv(gym.Env):
     '''
     HOUSE ENVIRONMENT WITHOUT OBSTACLES
     '''
-    def __init__(self, mode=0, freq_range=[1.0, 5.0], gamma=5.0):
+    def __init__(self, mode, freq_range, gamma, vae_path):
         super(houseEnv, self).__init__()
         # CPG parameters (f, Ah, Ak_st, Ak_sw, d, off_h, off_k) (x7)
         # Motor position correction (x8)
@@ -45,6 +49,17 @@ class houseEnv(gym.Env):
         # CPG proportional controler gain
         self.gamma = gamma
         self.freq_range = freq_range
+        # VAE model
+        '''
+        config_path = os.path.join(vae_path, "config.json")
+        config = json.load(open(config_path))
+        self.encoder = VAE(
+            in_channels=config["in_channels"],
+            latent_dim=config["latent_dim"]
+        )
+        self.encoder.load_state_dict(torch.load(os.path.join(vae_path, "best_model.pt")))
+        self.encoder.eval()
+        '''
 
     def step(self, action):
         # give action to agent
