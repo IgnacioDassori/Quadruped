@@ -1,4 +1,5 @@
 import torch
+torch.cuda.empty_cache()
 import json
 import os
 from modules import VAE, VAE_512, RGBDataset, HouseDataset
@@ -6,7 +7,6 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 import glob
 import sys
-import tqdm
 sys.path.append('..')
 
 if __name__ == "__main__":
@@ -17,22 +17,26 @@ if __name__ == "__main__":
 
     # hyperparameters
     in_channels = 3
-    latent_dim = 32
-    layers = [32, 64, 128, 256, 512]
-    lr = 5e-4
+    latent_dim = 40
+    layers = [16, 32, 64, 128, 256]
+    lr = 1e-4
     kld_weight = 0.00025
-    batch_size = 16
+    batch_size = 4
     activation = "LeakyReLU"
     batch_norm = "BatchNorm2d"
     output_activation = "Tanh"
-    tf = ["RandomHorizontalFlip"]
+    tf = ["RandomVerticalFlip", "RandomHorizontalFlip"]
+    grayscale = False
+    if grayscale:
+        in_channels = 1
 
     # create model
     model = VAE_512(in_channels=in_channels, 
                     latent_dim=latent_dim, 
                     lr=lr,
                     kld_weight=kld_weight,
-                    hidden_dims=layers)
+                    hidden_dims=layers,
+                    output_activation=output_activation)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -42,6 +46,12 @@ if __name__ == "__main__":
 
     transform = transforms.Compose([
         transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.ToTensor(),
+    ]) if not grayscale else transforms.Compose([
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.Grayscale(num_output_channels=1),
         transforms.ToTensor(),
     ])
 
@@ -68,7 +78,6 @@ if __name__ == "__main__":
 
             model.train()
             epoch_loss = 0
-
             for batch_images in train_loader:
                 batch_images = batch_images.float().to(device)
                 recon_images, mu, logvar = model(batch_images)
@@ -76,6 +85,7 @@ if __name__ == "__main__":
                 epoch_loss += loss.item()
                 model.optimizer.zero_grad()
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
                 model.optimizer.step()
             epoch_loss /= len(train_loader)
             loss_list.append(epoch_loss)

@@ -112,25 +112,29 @@ class VAE(nn.Module):
     
 
 class VAE_512(nn.Module):
-    def __init__(self, in_channels=3, latent_dim=16, lr=5e-3, kld_weight=0.00025, hidden_dims=[32, 64, 128, 256, 512]):
+    def __init__(self, in_channels=3, latent_dim=16, lr=5e-3, kld_weight=0.00025, hidden_dims=[32, 64, 128, 256, 512],
+                 output_activation="Tanh"):
         super(VAE_512, self).__init__()
 
         self.latent_dim = latent_dim
         self.lr = lr
         self.kld_weight = kld_weight
+        self.output_activation = output_activation
 
 
         # Build Encoder
         modules = []
+        in_channels_aux = in_channels
         for h_dim in hidden_dims:
             modules.append(
                 nn.Sequential(
-                    nn.Conv2d(in_channels, out_channels=h_dim,
+                    nn.Conv2d(in_channels_aux, out_channels=h_dim,
                               kernel_size= 4, stride = 2, padding  = 1),
                     nn.BatchNorm2d(h_dim),
-                    nn.LeakyReLU())
+                    nn.LeakyReLU(),
+                    nn.Dropout(p=0.1))
             )
-            in_channels = h_dim
+            in_channels_aux = h_dim
 
         self.encoder = nn.Sequential(*modules)
         reduced_size = int(512 / (2 ** len(hidden_dims)))
@@ -151,13 +155,14 @@ class VAE_512(nn.Module):
                                        stride = 2,
                                        padding=1),
                     nn.BatchNorm2d(hidden_dims[i + 1]),
-                    nn.LeakyReLU())
+                    nn.LeakyReLU(),
+                    nn.Dropout(p=0.1))
             )
         modules.append(
             nn.Sequential(
                 nn.ConvTranspose2d(hidden_dims[-1], out_channels= in_channels,
                                    kernel_size= 4, stride= 2, padding= 1),
-                nn.Tanh()
+                nn.Tanh() if self.output_activation == "Tanh" else nn.Sigmoid()
             )
         )
         self.decoder = nn.Sequential(*modules)
