@@ -13,9 +13,9 @@ if __name__ == "__main__":
 
 
     #version = "modulating_slopeEnv/even_bigger_updates_max4freq_biggernet_tr2"
-    version = "modulating_plainEnv/walk_straight"
+    version = "houseObstaclesEnv/test5"
     # load config from json
-    with open(f"results/{version}/config.json") as f:
+    with open(f"results_house/{version}/config.json") as f:
         config = json.load(f)
 
     # plot the results
@@ -42,12 +42,12 @@ if __name__ == "__main__":
         vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'], vae_path=config['vae_path'])])
     else:
         vec_env = DummyVecEnv([lambda: gym.make(gym_env, mode=1, freq_range=config['freq_range'], gamma=config['gamma'])])
-    vec_env = VecNormalize.load(f"results/{version}/vec_normalize.pkl", vec_env)
+    vec_env = VecNormalize.load(f"results_house/{version}/vec_normalize.pkl", vec_env)
     vec_env.training = False
     vec_env.norm_reward = False
 
     # load PPO model
-    model = PPO.load(f"results/{version}/best_model.zip")
+    model = PPO.load(f"results_house/{version}/best_model.zip")
 
     # evaluate model
     obs = vec_env.reset()
@@ -56,10 +56,9 @@ if __name__ == "__main__":
     R = []
     poses = []
     vel = []
-    for i in range(30000):
+    for i in range(50000):
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, dones, info = vec_env.step(action)
-        time.sleep(0.002)
         pos = vec_env.envs[0].quadruped.pos
         poses.append(pos)
         R.append(rewards[0])
@@ -71,7 +70,9 @@ if __name__ == "__main__":
         motor_positions.append(mp)
         cpg_params.append([cpg._f, cpg._Ah, cpg._Ak_st, cpg._Ak_sw, cpg._d, cpg._off_h, cpg._off_k])
         if dones:
-            rew = sum([0.99**i * r for i, r in enumerate(R)])
+            rew = sum([r for r in R])
+            print(rew)
+            R = []
             for i in range(len(poses)-1):
                 vel.append((poses[i+1][1]-poses[i][1])/0.002)
             

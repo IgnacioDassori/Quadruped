@@ -2,11 +2,11 @@
     "in_channels": 3,
     "latent_dim": 32,
     "layers": [
-        256,
-        128,
-        64,
+        16,
         32,
-        16
+        64,
+        128,
+        256
     ],
     "activation": "LeakyReLU",
     "batch_norm": "BatchNorm2d",

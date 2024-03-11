@@ -11,13 +11,13 @@ sys.path.append('..')
 
 if __name__ == "__main__":
 
-    log_dir = "VAE/results_house"
-    mode = "training"
+    log_dir = "VAE/results_house/dropout11"
+    mode = "eval"
     os.makedirs(log_dir, exist_ok=True) 
 
     # hyperparameters
     in_channels = 3
-    latent_dim = 40
+    latent_dim = 32
     layers = [16, 32, 64, 128, 256]
     lr = 1e-4
     kld_weight = 0.00025
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         config = dict(
             in_channels=in_channels,
             latent_dim=latent_dim,
-            layers=layers,
+            layers=layers.reverse(),
             activation=activation,
             batch_norm=batch_norm,
             output_activation=output_activation,
@@ -143,7 +143,8 @@ if __name__ == "__main__":
 
 
     # TEST MODEL
-
+    max = 0
+    min = 0
     # load the model
     model.load_state_dict(torch.load(log_dir + "/best_model.pt"))
     for batch_images in val_loader:
@@ -155,4 +156,4 @@ if __name__ == "__main__":
             recon_img = recon_img.squeeze()
             axes[0].imshow(transforms.ToPILImage()(test_img))
             axes[1].imshow(transforms.ToPILImage()(recon_img))
-            plt.show()
+            plt.show()      

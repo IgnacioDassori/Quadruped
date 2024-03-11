@@ -56,7 +56,7 @@ if __name__ == "__main__":
         yaw_rot = np.array(([math.cos(yaw), -math.sin(yaw), 0], [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1]))
         unit_vec = np.array([0, 0, 1])
         camera_up = np.array([0, 1, 0])
-        camera_dist = 0.2
+        camera_dist = 1
         camera_targ = 10000
         rotated = np.matmul(np.matmul(np.matmul(yaw_rot, pitch_rot), roll_rot), unit_vec)
         rotated_point = camera_dist*rotated + agent_pos
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         # camera view matrix
         view_matrix = p.computeViewMatrix(rotated_point, rotated_view, rotated_up)
         # camera projection matrix
-        projection_matrix = p.computeProjectionMatrixFOV(fov=90, aspect=1.0, nearVal=0.1, farVal=30.0)
+        projection_matrix = p.computeProjectionMatrixFOV(fov=70, aspect=1.0, nearVal=0.1, farVal=30.0)
         # get camera image
         image = p.getCameraImage(width=512, height=512, viewMatrix=view_matrix, projectionMatrix=projection_matrix, flags=p.ER_NO_SEGMENTATION_MASK)[2]    
     

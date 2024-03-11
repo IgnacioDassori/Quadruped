@@ -4,26 +4,27 @@ import random
 import numpy as np
 
 class SpawnManager:
-    def __init__(self, grid_size=10, spawn_objects=True):
+    def __init__(self, grid_size=10, spawn_objects=True, image_extraction=False):
         # Grid that represents the house
         self.grid = np.zeros((grid_size,grid_size))
-        self.max_obj = 7
-        self.objs = 0
-        self.goal = random.randint(2, 7)
+        self.max_obj = 5
+        self.objs = 0   
+        self.goal = random.choice([1, 2, 3, 6, 7, 8])
+        self.obstacles_pos = []
         # Determine robot spawn and fill cells
-        self.pos, self.angle = self.robot_spawn()
+        self.pos, self.angle = self.robot_spawn(image_extraction)
         # Spawn the goal which occupies one cell on the opposite side
         self.spawn_house()
         self.spawn_goal()     
         # In case there are no spots dont look again
-        self.valid_types = ['1x1', '2x2']
+        self.valid_types = ['1x1']
         if spawn_objects:
             self.main_loop()
 
 
     def main_loop(self):
         # Dont spawn near walls
-        for x in [0,9]:
+        for x in [0,1,8,9]:
             for y in range(10):
                 self.grid[x,y] = 1
                 self.grid[y,x] = 1
@@ -35,13 +36,29 @@ class SpawnManager:
             # 2: Cement Bags
             # 3: Ladder
             # 4: Pallet
-            obj_type = random.randint(0, 4) if len(self.valid_types) == 2 else 0
+            '''
+            if len(self.valid_types) == 2:
+                obj_type = random.randint(0, 4)
+            elif '1x1' in self.valid_types:
+                obj_type = 0
+            elif '2x2' in self.valid_types:
+                obj_type = random.randint(1, 4)
+            '''
+            # force traffic cone
+            obj_type = 0
             pos, roll = self.find_spots(obj_type)
             if pos == None:
                 continue
             self.spawn_object(obj_type, pos, roll)
 
-    def robot_spawn(self):
+    def robot_spawn(self, image_extraction):
+
+        # When training always spawn in the middle
+        if not image_extraction:
+            for i in range(7, 10):
+                for j in range(4, 6):
+                    self.grid[i,j] = 1
+            return [0, -4.5], 0
 
         # 1/3 chance of spawning bottom, left, right
         choice = random.uniform(0, 1)
@@ -137,14 +154,21 @@ class SpawnManager:
     
     def spawn_goal(self):
 
-        pos = [-4.5 + self.goal, 4.5, 1]
+        if self.goal not in [3, 6]:
+            sway = np.random.uniform(-0.5, 0.5)
+        elif self.goal == 3:
+            sway = np.random.uniform(-0.5, 0)
+        else:
+            sway = np.random.uniform(0, 0.5)
+        pos = [-4.5 + self.goal + sway, 4.5, 1]
 
-        radius = 1
         goalVisualShape = p.createVisualShape(p.GEOM_BOX, halfExtents=[0.5, 0.5, 1], rgbaColor=[1, 0, 0, 1])
 
         for i in range(0, 3):
-            for j in range(self.goal-2, self.goal+3):
+            for j in range(max(self.goal-2,0), min(self.goal+3,9)):
                 self.grid[i,j] = 1
+
+        self.goal = pos[:2]
 
         p.createMultiBody(baseMass=0, baseVisualShapeIndex=goalVisualShape, basePosition=pos)
 
@@ -170,8 +194,13 @@ class SpawnManager:
         objVisualShape = p.createVisualShape(p.GEOM_MESH,
                                                 fileName=file)
         
+        pos[0] += random.uniform(-0.25, 0.25)
+        pos[1] += random.uniform(-0.25, 0.25)
+
         objId = self.multibody(objCollisionShape, objVisualShape, 
                                pos, quat)
+        
+        self.obstacles_pos.append(pos[:2])
 
         return objId
         
