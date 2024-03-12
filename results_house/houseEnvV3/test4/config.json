@@ -1,0 +1,25 @@
+{
+    "env": "houseEnvV3",
+    "vae_path": "VAE/results_house/dropout11",
+    "lr": 0.0003,
+    "n_steps": 32768,
+    "batch_size": 4096,
+    "net_arch": {
+        "pi": [
+            2048,
+            1024
+        ],
+        "vf": [
+            2048,
+            1024
+        ]
+    },
+    "activation_fn": "<class 'torch.nn.modules.activation.ReLU'>",
+    "total_timesteps": 30000000,
+    "freq_range": [
+        1.5,
+        5.0
+    ],
+    "gamma": 10.0,
+    "use_vae": true
+}
