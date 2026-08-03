@@ -20,6 +20,13 @@ J. Vasquez).
 
 ### 1.1 Pipeline
 
+![Gait control pipeline overview](docs/figures/Pipeline_new.png)
+
+*The camera image is encoded by the VAE into a latent vector `l`. The MLP policy receives `l`, the
+proprioceptive observations `o_rob` and the CPG state `s_cpg`, and outputs CPG parameters `a_cpg`
+together with residual corrections `a_mod`. The CPG converts its parameters into periodic joint
+trajectories, and the sum `a_motor` is sent to the robot.*
+
 At every simulation step the controller executes the following sequence:
 
 1. An RGB image (512x512) is rendered from a camera attached to the robot base, pointing along the
@@ -42,6 +49,11 @@ simulation step.
 The CPG is implemented in `utils/cpg.py`. Four coupled oscillators, one per leg, share a common
 frequency `f` and are initialized with fixed phase offsets `[0, pi, pi/2, 3*pi/2]`, which produce a
 diagonal-sequence walking gait with a 90 degree shift between consecutive legs.
+
+<img src="docs/figures/phase_shift.png" alt="Phase shift between coupled oscillators" width="560">
+
+*Phase relationship between the four oscillators: front left, front right, back left and back
+right.*
 
 Phase integration:
 
@@ -81,6 +93,12 @@ g = 16*(theta'-0.5)^3 - 12*(theta'-0.5)^2 + 1           otherwise
 theta_k = A_k * g + off_k
 ```
 
+![Motor commands produced by the CPG](docs/figures/motor_commands_new.png)
+
+*Hip and knee commands over one second for `f = 4`, `d = 0.75`, `A_h = 0.3`, `A_k_st = 0.1`,
+`A_k_sw = 0.5`. Green marks the stance phase and yellow the swing phase. The knee stays close to
+extension during stance and contracts sharply to lift the leg during swing.*
+
 Three CPG variants are provided:
 
 | Class | Adaptive parameters | Used by |
@@ -92,6 +110,10 @@ Three CPG variants are provided:
 Only the eight sagittal joints (hip and knee of each leg, PyBullet joint indices 1, 2, 5, 6, 9, 10,
 13, 14) are driven by the CPG in the final architecture. The four coronal joints (indices 0, 4, 8,
 12) are held at zero.
+
+<img src="docs/figures/hip_knee.png" alt="Hip and knee joints of the Laikago robot" width="380">
+
+*The two actuated joints per leg in the sagittal plane.*
 
 `utils/cpg_test.py` is a standalone script that plots the hip and knee command profiles for a fixed
 parameter set, useful for inspecting the effect of each parameter without running the simulator.
@@ -514,6 +536,11 @@ they differ.
   along the opposite wall, tracing smooth steering curves in the XY plane. The baseline that applies
   PPO directly to the motor angles does not learn a meaningful policy within the same training
   budget.
+
+  ![Reward curves for the no-obstacle environment](docs/figures/reward_no_obs.jpeg)
+
+  *Mean reward with standard deviation in the no-obstacle goal-reaching task, comparing the CPG and
+  non-CPG strategies.*
 - In the obstacle task, the VAE-CPG architecture increases reward steadily throughout training and
   produces trajectories that deviate around the obstacles before reaching the goal. The baseline
   again fails to improve.

@@ -2,3 +2,7 @@
 laikago.py
 *.jpg
 *.png
+
+# README figures are tracked despite the image rules above
+!docs/figures/*.png
+!docs/figures/*.jpg
