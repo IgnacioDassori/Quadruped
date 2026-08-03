@@ -50,10 +50,14 @@ The CPG is implemented in `utils/cpg.py`. Four coupled oscillators, one per leg,
 frequency `f` and are initialized with fixed phase offsets `[0, pi, pi/2, 3*pi/2]`, which produce a
 diagonal-sequence walking gait with a 90 degree shift between consecutive legs.
 
-<img src="docs/figures/phase_shift.png" alt="Phase shift between coupled oscillators" width="560">
+<p align="center">
+  <img src="docs/figures/phase_shift.png" alt="Phase shift between coupled oscillators" width="57%">
+  &nbsp;&nbsp;
+  <img src="docs/figures/hip_knee.png" alt="Hip and knee joints of the Laikago robot" width="33%">
+</p>
 
-*Phase relationship between the four oscillators: front left, front right, back left and back
-right.*
+<p align="center"><em>Left: phase relationship between the four oscillators, front left, front
+right, back left and back right. Right: the two actuated joints per leg in the sagittal plane.</em></p>
 
 Phase integration:
 
@@ -110,10 +114,6 @@ Three CPG variants are provided:
 Only the eight sagittal joints (hip and knee of each leg, PyBullet joint indices 1, 2, 5, 6, 9, 10,
 13, 14) are driven by the CPG in the final architecture. The four coronal joints (indices 0, 4, 8,
 12) are held at zero.
-
-<img src="docs/figures/hip_knee.png" alt="Hip and knee joints of the Laikago robot" width="380">
-
-*The two actuated joints per leg in the sagittal plane.*
 
 `utils/cpg_test.py` is a standalone script that plots the hip and knee command profiles for a fixed
 parameter set, useful for inspecting the effect of each parameter without running the simulator.
